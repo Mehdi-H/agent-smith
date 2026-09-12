@@ -2,6 +2,30 @@
 
 <!-- version list -->
 
+## v0.3.1 (2026-09-12)
+
+### Build System
+
+- Automate zero-major versions and release operations 📦
+  ([`e4442ff`](https://github.com/Mehdi-H/agent-smith/commit/e4442ff74292140e03ed0e77884922be874ebc86))
+
+- Name the PyPI distribution agent-smith-cli 📦
+  ([`5eae764`](https://github.com/Mehdi-H/agent-smith/commit/5eae7644d2303b157820445ddda2d0b2efbf4469))
+
+### Continuous Integration
+
+- Publish verified releases from main with PyPI OIDC 🔧
+  ([`396b4dd`](https://github.com/Mehdi-H/agent-smith/commit/396b4dd4a70670ef5c8941a08273d229955ef3dc))
+
+### Documentation
+
+- Refresh the demo with release operations 📝
+  ([`12dd2c8`](https://github.com/Mehdi-H/agent-smith/commit/12dd2c8c30341d5a9c68c268512f4c481f671612))
+
+- Refresh the product introduction 📝
+  ([`1ec4e1b`](https://github.com/Mehdi-H/agent-smith/commit/1ec4e1b23f2c4f6c62300e4aa33db46b1a1e6824))
+
+
 ## v0.3.0 (2026-09-12)
 
 Changes introduced by [PR #5](https://github.com/Mehdi-H/agent-smith/pull/5).
