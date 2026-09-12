@@ -73,7 +73,7 @@ The generated video is not expected to be byte-identical across platforms.
 ## Continuous integration
 
 GitHub Actions runs `just check` on pull requests and pushes to `main`, using
-Ubuntu and a Python 3.10–3.14 matrix. Each job installs the mise-pinned tools and
+Ubuntu and a Python 3.11–3.14 matrix. Each job installs the mise-pinned tools and
 synchronizes uv.lock. `UV_PYTHON` selects the matrix interpreter instead of the
 local `.python-version` pin. Keep this matrix aligned with the supported Python
 classifiers in pyproject.toml.

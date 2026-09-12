@@ -1,13 +1,8 @@
 """Load optional TOML configuration and apply explicit CLI overrides."""
 
-import sys
+import tomllib
 from pathlib import Path
 from typing import cast
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 from agent_smith.application.ports import (
     ArchitectureDecisionsSection,

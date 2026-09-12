@@ -4,14 +4,10 @@ import json
 import os
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 import pytest
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 ROOT = Path(__file__).resolve().parents[2]
 PSR = Path(sys.executable).with_name("semantic-release")
