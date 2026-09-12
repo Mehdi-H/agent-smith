@@ -36,6 +36,20 @@ the coverage summary. Line and branch coverage reports are also available in
 environment outside the checkout. These checks are more expensive than the fast
 loop. Never silence warnings to make a check pass without addressing their cause.
 
+## Git hooks
+
+`just setup` installs Lefthook's pre-commit hook for this checkout. After updating
+an existing checkout, run `mise install` and `just hooks-install` to enable it.
+Every commit runs `just check` and `just cli-check`; a failure blocks the commit.
+`just cli-check` invokes the installed `agent-smith` command without arguments,
+through uv, offline and without synchronizing dependencies. It currently checks
+startup and a successful exit; document generation is not implemented yet.
+
+Run `just hooks-check` to execute the hook manually. Lefthook displays a progress
+summary while successful checks stay quiet. Hooks use mise to resolve the pinned
+tools; mise must be on the PATH of the terminal or IDE that runs Git. Checks
+inspect the working tree, so review partially staged changes before committing.
+
 ## Feedback commands
 
 The repository's check recipes return 0 silently on success, or 1 with diagnostics
