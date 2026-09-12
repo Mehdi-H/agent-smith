@@ -340,3 +340,23 @@ access and is separate from `just check`.
 After correcting an action, merge and let a new main pipeline complete before
 checking again: old annotations are immutable. Codecov uploads run only on main
 with Python 3.14.
+
+## Dependency updates
+
+- `just updates-mise` lists newer project mise tools. VHS 0.12.0 alone is excluded
+  because its demo export is broken (ADR 18); later versions remain visible.
+- `just updates-uv` previews lock changes with `uv lock --upgrade --dry-run`.
+  It respects dependency constraints and the seven-day publication cooldown.
+- `just updates-check` runs both inventories, silently returning 0 when current,
+  or 1 with update details or errors. These commands require network access and
+  are separate from `just check`. They do not modify the lock or tool versions.
+
+Review changes before applying `mise upgrade` or `uv lock --upgrade`, then run
+`uv sync --locked --group release`, `just check` and `just test`. Use `just demo`
+to verify rendering-tool updates. Versions outside Python dependency bounds and
+pinned build-system requirements need a deliberate constraint review.
+
+The project uses `[tool.uv].exclude-newer = "7 days"` to delay newly published
+Python artifacts. The lockfile keeps installations reproducible. This reduces
+exposure to fresh compromised releases without replacing vulnerability audits;
+it does not cover mise tools or Python interpreter downloads. See ADR 29.
