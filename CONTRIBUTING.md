@@ -252,3 +252,61 @@ endings consistent across editors.
 The commit skill was inspired by the
 [Cinematch commit helper](https://github.com/umans-ai/cinematch/blob/main/.claude/skills/commit/SKILL.md)
 from umans-ai and adapted to Agent Smith's conventions.
+
+## Automated releases
+
+The distribution is `agent-smith-cli`; its executable is `agent-smith`.
+`just setup` installs the pinned Python Semantic Release tool from the uv
+`release` group. Version files must not be bumped in feature PRs:
+
+| Commit | Release below 1.0 |
+| --- | --- |
+| `feat:` | Minor |
+| `fix:` or `perf:` | Patch |
+| `!` or `BREAKING CHANGE:` | Minor |
+| Only documentation, tests or tooling | None |
+
+Moving to 1.0 requires an explicit maintainer decision and configuration change.
+`just release-preview` previews committed changes as main in a disposable clone.
+It reads the configuration under review but does not include uncommitted product
+changes. It performs no publication and leaves the working checkout unchanged.
+
+`just build` clears previous wheel/sdist files from `dist/` and builds both.
+`just distributions-check` installs each exact artifact in an isolated environment
+and checks CLI help, version and generation. `just package-check` remains the
+independent build-and-install check. `just help` lists all release operations.
+
+On a push to main, `release.yml` calls the CI matrix, then `just release`:
+PSR stamps the version, invokes `just release-build` to synchronize uv.lock,
+build and verify distributions, generates CHANGELOG.md, commits and tags the
+release, and creates its GitHub release notes. `just publish-github` attaches
+wheel and sdist. GitHub Actions retains the same distributions for 30 days;
+the separate `pypi` job runs `just publish-pypi` using OIDC, without rebuilding.
+The workflow uses its GitHub token for release commits; those pushes do not
+trigger another workflow run. A newer main revision causes an old run to abort.
+
+> [!NOTE]
+> Publication recipes are guarded for GitHub Actions on main. Building and
+> previewing are available locally. No package publication runs from a PR or tag.
+
+The PyPI Trusted Publisher must match owner `Mehdi-H`, repository `agent-smith`,
+workflow `release.yml`, environment `pypi` and project `agent-smith-cli`.
+The GitHub environment only allows the main branch. If branch protection is
+introduced later, ensure the release identity can push version commits without
+weakening contributor protections; use an appropriately scoped GitHub App if needed.
+
+For the first publication after this tooling-only PR, manually run the Release
+workflow on **main**, set `bootstrap=true`, and leave `retry_tag` empty. This
+creates the next patch version (0.3.1 from the existing 0.3.0 tag). Do this only
+when ready to publish; registering the pending publisher did not publish anything.
+
+If PyPI upload fails after the GitHub release was populated, run the workflow
+on main with `retry_tag` set to that existing tag and `bootstrap=false`.
+`just release-recover` checks the tag belongs to main, downloads its distribution
+assets and smoke-tests them; it does not rebuild or bump. uv's `--check-url`
+compares existing PyPI files so a partial upload can be retried. If GitHub assets
+are missing too, inspect the failed run and restore the verified distributions
+before retrying. Never overwrite a published version with rebuilt artifacts.
+
+Initial changelog entries were imported from the existing GitHub releases;
+new entries and release notes are generated from Conventional Commits by PSR.

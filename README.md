@@ -1,6 +1,6 @@
 # Agent Smith 🕶️
 
-[![CI](https://github.com/Mehdi-H/agent-smith/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Mehdi-H/agent-smith/actions/workflows/ci.yml?query=branch%3Amain)
+[![CI](https://github.com/Mehdi-H/agent-smith/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/Mehdi-H/agent-smith/actions/workflows/release.yml?query=branch%3Amain)
 [![Python 3.10–3.14](https://img.shields.io/badge/python-3.10%E2%80%933.14-blue?logo=python&logoColor=white)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
