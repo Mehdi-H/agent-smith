@@ -22,6 +22,7 @@ The output is deterministic Markdown.
 - `glow` — `3.0.0`
 - `just` — `1.58.0`
 - `lefthook` — `2.1.12`
+- `shellcheck` — `0.11.0`
 - `tmux` — `3.7c`
 - `uv` — `0.12.13`
 - `vhs` — `0.11.0`
@@ -73,6 +74,7 @@ The output is deterministic Markdown.
 - `just dependencies` — Detect missing, unused or incorrectly classified runtime dependencies.
 - `just lint` — Check Python lint rules and Python/justfile formatting without changing files.
 - `just manifest-check *paths` — Verify that every just recipe is documented and belongs to a group.
+- `just shellcheck-check` — Check all .sh and .bash scripts recursively with ShellCheck.
 - `just skills-check path=".agents/skills"` — Validate local skill structure strictly (optional skill or collection directory).
 - `just test-doubles-check` — Reject patching in tests; use real collaborators or explicitly injected doubles.
 - `just types` — Check types against the minimum supported Python; warnings fail the check.

@@ -50,7 +50,7 @@ build:
 
 # Check lint, formatting, types, dependencies and fast tests without network or sync.
 [group("Quality")]
-check: lint types dependencies bandit-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check
+check: lint types dependencies bandit-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check
     sh scripts/feedback.sh "Unit tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q tests/unit
 
 # Check Python lint rules and Python/justfile formatting without changing files.
@@ -149,3 +149,8 @@ bandit-check:
 [group("Quality")]
 audit-check:
     sh scripts/feedback.sh "pip-audit" "Update vulnerable dependencies and uv.lock, or resolve the reported network error." sh scripts/check_audit.sh
+
+# Check all .sh and .bash scripts recursively with ShellCheck.
+[group("Quality")]
+shellcheck-check:
+    sh scripts/feedback.sh "ShellCheck" "Fix the shell diagnostics at the reported files and lines." find scripts -type f \( -name '*.sh' -o -name '*.bash' \) -exec shellcheck {} +
