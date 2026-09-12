@@ -103,6 +103,20 @@ is the content. Do not wrap those producers in the silent feedback wrapper.
 Instructions and ADRs guide work before execution; these checks provide feedback
 after execution.
 
+## Changed-function complexity
+
+Run `just complexity-check` to enforce a Complexipy cognitive complexity of at
+most **8** on added or modified Python functions, including tests and scripts.
+It is included in `just check`. Refactor reported functions; do not suppress the
+check. Diagnostics identify the file, line, function and measured score.
+
+The comparison uses the merge base with local `main`, including local staged,
+unstaged and untracked Python changes. On `main` it uses the previous commit.
+Use `COMPLEXITY_BASE=<git-ref> just complexity-check` for another baseline.
+CI supplies the PR base or pre-push commit and fetches the required history.
+Unchanged functions are ignored even when they exceed the limit; changed
+functions must meet the limit even when their score decreased.
+
 ## Skill structure
 
 Run `just skills-check` to validate `.agents/skills`, or `just skills-check PATH`

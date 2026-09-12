@@ -45,7 +45,7 @@ build:
 
 # Check lint, formatting, types, dependencies and fast tests without network or sync.
 [group("Quality")]
-check: lint types dependencies test-structure manifest-check skills-check workflows-check
+check: lint types dependencies complexity-check test-structure manifest-check skills-check workflows-check
     sh scripts/feedback.sh "Unit tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q tests/unit
 
 # Check Python lint rules and Python/justfile formatting without changing files.
@@ -74,6 +74,11 @@ skills-check path=".agents/skills":
 [group("Quality")]
 types:
     sh scripts/feedback.sh "Type checking" "Fix the reported type errors and warnings." uv run --offline --no-sync ty check --error-on-warning
+
+# Limit changed Python functions to cognitive complexity 8 against the branch baseline.
+[group("Quality")]
+complexity-check:
+    sh scripts/feedback.sh "Changed function complexity" "Refactor each reported function to complexity 8 or less; set COMPLEXITY_BASE to override the Git baseline." uv run --offline --no-sync python scripts/check_complexity.py
 
 # Detect missing, unused or incorrectly classified runtime dependencies.
 [group("Quality")]
