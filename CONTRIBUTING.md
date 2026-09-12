@@ -4,12 +4,61 @@ Install [mise](https://mise.jdx.dev/), then run `mise trust` and `mise install`.
 Activate mise in your shell or prefix commands with `mise exec --`.
 Run `just` to discover documented operations.
 
+Run `just setup` to install the pinned Python and synchronize the locked virtual
+environment. `just check` runs lint, format verification, types, dependency checks
+and fast tests offline, without synchronizing or downloading packages. Its target
+is under one second on a prepared, warm environment. `just fmt` formats Python
+and the justfile; `just fmt-just` formats only the justfile. `just check` verifies
+both formats without modifying files.
+
+Run `just test` for the full suite, including subprocess integration tests, with
+native pytest output displayed directly in the terminal, including progress and
+the coverage summary. Line and branch coverage reports are also available in
+`coverage.xml` and `htmlcov/index.html`. Run
+`just package-check` to build fresh artifacts and verify the wheel in a temporary
+environment outside the checkout. These checks are more expensive than the fast
+loop. Never silence warnings to make a check pass without addressing their cause.
+
+## Feedback commands
+
+The repository's check recipes return 0 silently on success, or 1 with diagnostics
+on failure. Reports such as coverage remain available as files. Use the shared
+process wrapper when adding a check; the checked command can use any language:
+
+```sh
+sh scripts/feedback.sh 'Check name' 'How to fix or investigate the failure' command arg1 arg2
+```
+
+The wrapper preserves native output and records the native exit code on failure.
+Do not hide setup failures, missing tools or failed checks with `|| true`. Just
+recipes suppress command echo; just may add its own diagnostic on failure.
+This harness currently requires a POSIX shell. The installed CLI does not.
+
+`just test` is an interactive operation: it displays pytest's native output even
+on success, while still returning 1 on any failure. `just check` remains the
+silent-on-success feedback loop for agents.
+
+Commands that generate section content have a different contract: their stdout
+is the content. Do not wrap those producers in the silent feedback wrapper.
+Instructions and ADRs guide work before execution; these checks provide feedback
+after execution.
+
+## Architecture
+
+Keep argparse in the CLI adapter and wire dependencies in the composition root.
+As generation is implemented, define small typed ports next to the application
+capability that owns them, with `typing.Protocol`. Application code must not
+import CLI or infrastructure adapters. Inject implementations for process and
+filesystem access, and test the core with in-memory implementations. Do not add
+unused ports or empty layers before a capability needs them.
+
 Use short descriptive branch names without a `codex/` prefix. Keep commits atomic
 and follow the [commit skill](.agents/skills/commit/SKILL.md): Conventional Commits,
 an emoji at the end of the subject, and no agent co-author trailers.
 
 Add tools, recipes, tests and ADRs in the PR that introduces their use. Follow the
 [ADR skill](.agents/skills/adr/SKILL.md) for structural operations on decisions.
+Keep tool entries in mise.toml in alphabetical order by tool name.
 The optional `.editorconfig` conventions keep indentation, encoding and line
 endings consistent across editors.
 

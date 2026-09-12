@@ -11,6 +11,8 @@ Accepted
 Humans and agents need discoverable operations that can also be reused by future
 CI workflows. Separate shell instructions in documentation and CI would drift.
 
+This records the maintainer's choice of an autodocumented justfile. Make is a known alternative, also mentioned in the companion article; no comparative trial was performed.
+
 ## Decision
 
 Use commented just recipes as the repository's operations interface. Running
