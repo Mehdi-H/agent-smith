@@ -4,6 +4,8 @@
 
 [![CI](https://github.com/Mehdi-H/agent-smith/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/Mehdi-H/agent-smith/actions/workflows/release.yml?query=branch%3Amain)
 [![Python 3.10–3.14](https://img.shields.io/badge/python-3.10%E2%80%933.14-blue?logo=python&logoColor=white)](pyproject.toml)
+[![Codecov](https://codecov.io/github/Mehdi-H/agent-smith/branch/main/graph/badge.svg?token=9RYPPL8VLH)](https://codecov.io/github/Mehdi-H/agent-smith)
+[![PyPI](https://img.shields.io/pypi/v/agent-smith-cli)](https://pypi.org/project/agent-smith-cli/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 *Smith* your AGENTS.md file 🕶️
