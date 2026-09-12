@@ -134,3 +134,8 @@ fmt-just:
 [group("Packaging")]
 package-check:
     sh scripts/feedback.sh "Package installation" "Fix the build or installed CLI behavior reported below." uv run --no-sync python scripts/check_package.py
+
+# Count collected test cases by pyramid level without executing them.
+[group("Tests")]
+tests-pyramid:
+    uv run --offline --no-sync python scripts/tests_pyramid.py

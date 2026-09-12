@@ -174,6 +174,8 @@ are correct or useful; review their meaning too.
 Follow the test pyramid: put isolated rules and application cases in `tests/unit`,
 real adapter contracts in `tests/integration`, and a few complete installed-CLI
 journeys in `tests/functional`. Use directories rather than duplicate markers.
+Run `just tests-pyramid` to display the collected case count and percentage for each level
+without running tests. Each parametrized case counts separately.
 Run a level with `just test-unit`, `just test-integration` or
 `just test-functional`; `just test` runs all levels. `just check` selects only
 unit tests for its fast loop. Favor unit tests for edge cases without enforcing
