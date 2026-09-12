@@ -23,7 +23,7 @@ build:
     uv build --no-sources
 
 # Check lint, formatting, types, dependencies and fast tests without network or sync.
-check: lint types dependencies
+check: lint types dependencies test-structure
     sh scripts/feedback.sh "Fast tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q -m "not integration"
 
 # Check Python lint rules and Python/justfile formatting without changing files.
@@ -43,6 +43,10 @@ dependencies:
 # Show native pytest output for all tests, with branch coverage and XML/HTML reports.
 test:
     uv run --offline --no-sync pytest --cov-report=xml --cov-report=html || exit 1
+
+# Verify Given/When/Then comments in Python tests (optional test files or directories).
+test-structure *paths:
+    sh scripts/feedback.sh "Test structure" "Structure each reported test with # Given, # When and # Then comments." uv run --offline --no-sync python scripts/check_test_structure.py "$@"
 
 # Apply Python and justfile formatting.
 fmt: fmt-just

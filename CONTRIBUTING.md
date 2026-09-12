@@ -43,6 +43,22 @@ is the content. Do not wrap those producers in the silent feedback wrapper.
 Instructions and ADRs guide work before execution; these checks provide feedback
 after execution.
 
+## Test structure
+
+Structure every test with one standalone `# Given`, `# When`, and `# Then`
+comment, in that order, at the test body's indentation. Add a short explanation
+after the marker when it clarifies the scenario. Given describes setup or supplied
+fixtures, When identifies the action, and Then introduces expected outcomes.
+Avoid hiding the action in an assertion when it can be captured separately.
+
+`just test-structure` checks the convention and is included in `just check`.
+It reports the file, test definition line and test name. It recognizes actual
+comments, not strings, for `test_*` functions and methods in `Test*` classes in
+`test_*.py` and `*_test.py` files. Marker matching is case-insensitive. This checks
+structure, not whether the comments accurately describe the test; review still
+checks their meaning. The checker is repository tooling, not a requirement for
+projects using Agent Smith.
+
 ## Architecture
 
 Keep argparse in the CLI adapter and wire dependencies in the composition root.
