@@ -1,5 +1,5 @@
 [project]
-name = "agent-smith"
+name = "agent-smith-cli"
 version = "0.3.0"
 description = "Build agent instructions from your project's sources."
 readme = "README.md"
@@ -43,6 +43,9 @@ dev = [
     "ruff>=0.16.7",
     "ty>=0.0.80",
 ]
+
+[tool.uv.build-backend]
+module-name = "agent_smith"
 
 [tool.ruff]
 target-version = "py310"

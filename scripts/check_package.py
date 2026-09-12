@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 
 def verify() -> None:
     """Build through uv, install the resulting wheel, and exercise both entry points."""
-    expected_version = version("agent-smith")
+    expected_version = version("agent-smith-cli")
     with TemporaryDirectory(prefix="agent-smith-package-") as directory:
         root = Path(directory)
         dist = root / "dist"

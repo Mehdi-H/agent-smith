@@ -22,6 +22,6 @@ def test_installed_entry_points(module: bool, tmp_path: Path) -> None:
     )
     # Then installation metadata is returned without creating output files.
     assert result.returncode == 0, result.stderr
-    assert result.stdout == f"agent-smith {version('agent-smith')}\n"
+    assert result.stdout == f"agent-smith {version('agent-smith-cli')}\n"
     assert result.stderr == ""
     assert list(tmp_path.iterdir()) == []

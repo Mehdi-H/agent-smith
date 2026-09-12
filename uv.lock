@@ -7,7 +7,7 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "agent-smith"
+name = "agent-smith-cli"
 version = "0.3.0"
 source = { editable = "." }
 dependencies = [
