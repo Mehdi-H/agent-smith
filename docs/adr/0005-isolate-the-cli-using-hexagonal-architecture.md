@@ -10,6 +10,8 @@ Accepted
 
 Agent Smith will assemble Markdown from project sources. Its behavior must be testable independently of argument parsing, process execution and filesystem access, and replacing the CLI library must not require rewriting generation.
 
+This records the explicitly requested architectural principles and the accepted argparse choice. Click and Typer were identified and discussed at a documentation level. Neither was prototyped or benchmarked for Agent Smith.
+
 ## Decision
 
 Follow the three principles in the OCTO article: separate user adapters, business logic and infrastructure; point dependencies inward; define ports at the boundaries. Use argparse only in the CLI adapter. The composition root supplies installation metadata. As generation is introduced, define focused typing.Protocol interfaces beside the application capabilities that own them, inject infrastructure adapters, and pass ordinary typed requests and results across the CLI boundary. Keep argparse.Namespace, sys.exit, subprocess and filesystem operations outside the core. Use explicit composition, without a dependency injection framework.
