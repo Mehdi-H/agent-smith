@@ -27,19 +27,19 @@ Repository = "https://github.com/Mehdi-H/agent-smith"
 Issues = "https://github.com/Mehdi-H/agent-smith/issues"
 
 [build-system]
-requires = ["uv_build==0.12.13"]
+requires = ["uv_build==0.12.10"]
 build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
     "bandit[toml]>=1.9.4",
-    "complexipy>=6.2,<7",
+    "complexipy>=8,<9",
     "deptry>=0.25.1",
     "pip-audit>=2.10.1",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
-    "ruff>=0.16.7",
-    "ty>=0.0.80",
+    "ruff>=0.16.6",
+    "ty>=0.0.78",
 ]
 release = [
     "python-semantic-release==10.6.2",
@@ -104,6 +104,7 @@ changelog_file = "CHANGELOG.md"
 dist_glob_patterns = ["dist/*.whl", "dist/*.tar.gz"]
 
 [tool.uv]
+exclude-newer = "7 days"
 # PSR 10.6.2's ~=8.1.0 cap selects Click affected by PYSEC-2026-2132.
 # Keep the upstream <8.5 ceiling; exercise PSR's real CLI in integration tests.
 override-dependencies = ["click>=8.3.3,<8.5"]

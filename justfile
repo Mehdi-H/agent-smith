@@ -199,3 +199,18 @@ release-recover tag:
 [group("Quality")]
 workflow-warnings:
     sh scripts/feedback.sh "Workflow annotations" "Fix the reported actions, rerun the workflow, then check the latest main run again." sh scripts/workflow-warnings.sh
+
+# List newer mise tools, excluding the broken VHS 0.12.0 release (network required).
+[group("Maintenance")]
+updates-mise:
+    sh scripts/list-updates.sh mise
+
+# Preview uv lock updates allowed by project constraints and cooldown (network required).
+[group("Maintenance")]
+updates-uv:
+    sh scripts/list-updates.sh uv
+
+# Fail when either update inventory finds actionable updates or cannot complete.
+[group("Quality")]
+updates-check:
+    sh scripts/feedback.sh "Dependency updates" "Review the listed updates, apply them, run just check and just test, then retry." sh scripts/updates-check.sh
