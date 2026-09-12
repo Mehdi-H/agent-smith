@@ -146,9 +146,11 @@ def test_bootstrap_forces_only_a_patch(release_repo: Path) -> None:
 
 def test_lock_refresh_keeps_third_party_versions(tmp_path: Path) -> None:
     # Given the real locked project with only its version stamp changed.
-    project = (
-        (ROOT / "pyproject.toml").read_text().replace('version = "0.3.0"', 'version = "0.3.1"', 1)
-    )
+    project = (ROOT / "pyproject.toml").read_text()
+    current = tomllib.loads(project)["project"]["version"]
+    major, minor, micro = current.split(".")
+    following = f"{major}.{minor}.{int(micro) + 1}"
+    project = project.replace(f'version = "{current}"', f'version = "{following}"', 1)
     (tmp_path / "pyproject.toml").write_text(project)
     (tmp_path / "uv.lock").write_bytes((ROOT / "uv.lock").read_bytes())
     before = tomllib.loads((tmp_path / "uv.lock").read_text())["package"]
@@ -164,7 +166,7 @@ def test_lock_refresh_keeps_third_party_versions(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     after = tomllib.loads((tmp_path / "uv.lock").read_text())["package"]
     project_after = next(package for package in after if package["name"] == "agent-smith-cli")
-    assert project_after["version"] == "0.3.1"
+    assert project_after["version"] == following
     assert [p for p in before if p["name"] != "agent-smith-cli"] == [
         p for p in after if p["name"] != "agent-smith-cli"
     ]
