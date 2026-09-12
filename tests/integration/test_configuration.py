@@ -13,29 +13,24 @@ from agent_smith.application.ports import (
 )
 
 
-def test_missing_default_configuration_uses_convention(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_missing_default_configuration_uses_convention(tmp_path: Path) -> None:
     # Given an invocation directory with no configuration file.
-    monkeypatch.chdir(tmp_path)
+    configuration = TomlConfiguration(directory=tmp_path)
     # When the default configuration is loaded.
-    request = TomlConfiguration().load(None, output=None, no_overview=False)
+    request = configuration.load(None, output=None, no_overview=False)
     # Then the built-in overview and AGENTS.md output are selected.
     assert request == GenerationRequest()
 
 
-def test_configuration_loads_sections_and_cli_overrides(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_configuration_loads_sections_and_cli_overrides(tmp_path: Path) -> None:
     # Given a default configuration that enables overview and custom sections.
-    monkeypatch.chdir(tmp_path)
-    Path("agent-smith.toml").write_text(
+    (tmp_path / "agent-smith.toml").write_text(
         'output = "configured.md"\n[overview]\nsource = "intro.md"\ntitle = "Introduction"\n'
         '[[sections]]\ntitle = "Custom"\ncommand = "./custom.sh"\n',
         encoding="utf-8",
     )
     # When CLI output and overview overrides are applied.
-    request = TomlConfiguration().load(None, output="chosen.md", no_overview=True)
+    request = TomlConfiguration(directory=tmp_path).load(None, output="chosen.md", no_overview=True)
     # Then explicit CLI settings take precedence and custom commands are preserved.
     assert request == GenerationRequest("chosen.md", (CommandSection("Custom", "./custom.sh"),))
 

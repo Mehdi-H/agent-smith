@@ -117,6 +117,19 @@ CI supplies the PR base or pre-push commit and fetches the required history.
 Unchanged functions are ignored even when they exceed the limit; changed
 functions must meet the limit even when their score decreased.
 
+## Sociable tests and explicit dependencies
+
+Prefer direct tests with real, fast collaborators. Inject mocks, stubs or fakes
+when needed at boundaries; do not replace dependencies through global patching.
+This applies to fixtures and helpers as well as test functions. Follow
+[our sociable testing decision](docs/adr/0016-prefer-sociable-tests-and-injected-doubles-over-patching.md).
+
+`just test-doubles-check` is included in `just check`. It rejects textual uses of
+`monkeypatch`, `patch` and related API names in all Python test sources, including
+comments and strings, with a file and line diagnostic. This lightweight guard
+does not replace review of other runtime replacement techniques. Explicitly
+injected `unittest.mock.Mock` objects are allowed.
+
 ## Skill structure
 
 Run `just skills-check` to validate `.agents/skills`, or `just skills-check PATH`
