@@ -36,6 +36,18 @@ the coverage summary. Line and branch coverage reports are also available in
 environment outside the checkout. These checks are more expensive than the fast
 loop. Never silence warnings to make a check pass without addressing their cause.
 
+## Continuous integration
+
+GitHub Actions runs `just check` on pull requests and pushes to `main`, using
+Ubuntu and a Python 3.10–3.14 matrix. Each job installs the mise-pinned tools and
+synchronizes uv.lock. `UV_PYTHON` selects the matrix interpreter instead of the
+local `.python-version` pin. Keep this matrix aligned with the supported Python
+classifiers in pyproject.toml.
+
+This initial workflow runs the fast checks and tests from `just check`;
+the full integration suite remains available through `just test`. Packaging and
+deployment are not part of this workflow.
+
 ## Git hooks
 
 `just setup` installs Lefthook's pre-commit hook for this checkout. After updating
