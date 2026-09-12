@@ -46,7 +46,7 @@ build:
 # Check lint, formatting, types, dependencies and fast tests without network or sync.
 [group("Quality")]
 check: lint types dependencies test-structure manifest-check skills-check workflows-check
-    sh scripts/feedback.sh "Fast tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q -m "not integration"
+    sh scripts/feedback.sh "Unit tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q tests/unit
 
 # Check Python lint rules and Python/justfile formatting without changing files.
 [group("Quality")]
@@ -84,6 +84,21 @@ dependencies:
 [group("Tests")]
 test:
     uv run --offline --no-sync pytest --cov-report=xml --cov-report=html || exit 1
+
+# Run fast unit tests in isolation from files and subprocesses.
+[group("Tests")]
+test-unit:
+    uv run --offline --no-sync pytest tests/unit || exit 1
+
+# Run focused integration tests against real adapters and tools.
+[group("Tests")]
+test-integration:
+    uv run --offline --no-sync pytest tests/integration || exit 1
+
+# Run user scenarios through the installed CLI in a separate process.
+[group("Tests")]
+test-functional:
+    uv run --offline --no-sync pytest tests/functional || exit 1
 
 # Verify Given/When/Then comments in Python tests (optional test files or directories).
 [group("Tests")]

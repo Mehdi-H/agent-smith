@@ -5,10 +5,9 @@ from pathlib import Path
 
 import pytest
 
-WRAPPER = Path(__file__).resolve().parents[1] / "scripts" / "feedback.sh"
+WRAPPER = Path(__file__).resolve().parents[2] / "scripts" / "feedback.sh"
 
 
-@pytest.mark.integration
 def test_feedback_success_is_silent() -> None:
     # Given a successful command that writes to both output streams.
     command = ["sh", "-c", "echo ok; echo note >&2"]
@@ -24,7 +23,6 @@ def test_feedback_success_is_silent() -> None:
     assert result.stdout == result.stderr == ""
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize("status", [1, 2, 5, 127])
 def test_feedback_normalizes_failure_and_preserves_diagnostics(status: int) -> None:
     # Given a failing command and its native status supplied by parametrization.
@@ -55,7 +53,6 @@ def test_feedback_normalizes_failure_and_preserves_diagnostics(status: int) -> N
     assert "Fix the example" in result.stderr
 
 
-@pytest.mark.integration
 def test_feedback_missing_command_does_not_report_success() -> None:
     # Given an unavailable executable.
     command = "agent-smith-nonexistent-tool"

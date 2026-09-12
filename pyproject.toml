@@ -58,7 +58,6 @@ github_warning_errors = []
 testpaths = ["tests"]
 addopts = "--strict-config --strict-markers --cov=agent_smith --cov-branch --cov-report=term-missing"
 filterwarnings = ["error"]
-markers = ["integration: execute the installed CLI in a separate process"]
 
 [tool.coverage.run]
 relative_files = true
