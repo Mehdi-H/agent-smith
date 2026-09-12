@@ -310,3 +310,18 @@ before retrying. Never overwrite a published version with rebuilt artifacts.
 
 Initial changelog entries were imported from the existing GitHub releases;
 new entries and release notes are generated from Conventional Commits by PSR.
+
+
+## Codecov coverage and Test Analytics
+
+Run `just test` to generate `coverage.xml`, `htmlcov/` and `junit.xml` from all
+three test suites. The JUnit report uses pytest's legacy family for Codecov Test
+Analytics. These generated files are ignored by Git.
+
+Install the Codecov GitHub App for Mehdi-H/agent-smith, sign in to Codecov with
+GitHub, and select this repository. CI uploads coverage and test results using
+OIDC (`use_oidc: true`); do not create a CODECOV_TOKEN secret for this setup.
+Only main runs upload reports: each Python matrix entry uses a distinct name.
+All PRs still run all tests but skip Codecov uploads. Upload failures fail the CI job;
+reports are sent after failed tests when files exist and the run was not cancelled.
+The first main upload populates the coverage badge. Codecov does not analyze PRs.
