@@ -252,6 +252,58 @@ to disable command discovery, or change its `command` to another source of
 standard just list output, such as `just --list`. Explicit `enabled = true`
 requires the command to work even if no root justfile was detected.
 
+### Add multiple custom sections
+
+In TOML, double brackets such as `[[sections]]` add an item to an **array of
+tables**: here, a list of custom sections. Repeat that exact header for each
+section, followed by its own `title` and `command`. You do not need to number
+the headers or give them different names.
+
+For example, use these three blocks in `agent-smith.toml`:
+
+```toml
+[[sections]]
+title = "Tracked files"
+command = "git ls-files"
+
+[[sections]]
+title = "Development guidelines"
+command = "cat docs/development.md"
+
+[[sections]]
+title = "Project context"
+command = "bash scripts/project-context.sh"
+```
+
+Supply the referenced files and scripts, then run `agent-smith`. It appends
+these three sections after the built-ins, in the order shown. Each command's
+stdout becomes the Markdown body under its section's H2 heading, with a footer
+recording the command. Any executable can provide the content; Python is not
+required.
+
+### Control section order
+
+The generated document follows this order, omitting disabled or undetected
+built-ins:
+
+1. Overview
+2. Main tech stack
+3. Available commands
+4. Architecture decisions
+5. Custom sections, in the order of their `[[sections]]` blocks
+
+To reorder custom sections, move their entire `[[sections]]` blocks in
+`agent-smith.toml`. For example, moving the "Project context" block above
+"Tracked files" makes it appear first among the custom sections.
+
+> [!NOTE]
+> Built-in order is currently fixed. Moving `[overview]`, `[tech_stack]`,
+> `[available_commands]` or `[architecture_decisions]` in the TOML file does not
+> change their output order. Custom sections cannot currently be inserted before
+> or between built-ins, and there is no `order` or `position` setting.
+
+### Replace a built-in section
+
 To replace the overview with your own extractor:
 
 ```toml
