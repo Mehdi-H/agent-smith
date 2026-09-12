@@ -7,10 +7,9 @@ from textwrap import indent
 
 import pytest
 
-CHECKER = Path(__file__).resolve().parents[1] / "scripts" / "check_test_structure.py"
+CHECKER = Path(__file__).resolve().parents[2] / "scripts" / "check_test_structure.py"
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     ("body", "valid"),
     [
@@ -46,7 +45,6 @@ def test_structure_recognizes_only_ordered_standalone_markers(
         assert f"{source}:1: test_example:" in result.stderr
 
 
-@pytest.mark.integration
 def test_structure_supports_async_methods(tmp_path: Path) -> None:
     # Given a test class containing an asynchronous test method.
     source = tmp_path / "example_test.py"
@@ -69,7 +67,6 @@ def test_structure_supports_async_methods(tmp_path: Path) -> None:
     assert result.stdout == result.stderr == ""
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize("content", [None, "def broken(:\n"])
 def test_structure_invalid_inputs_fail(content: str | None, tmp_path: Path) -> None:
     # Given a missing or syntactically invalid test file.

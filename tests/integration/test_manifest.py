@@ -6,10 +6,9 @@ from pathlib import Path
 
 import pytest
 
-CHECKER = Path(__file__).resolve().parents[1] / "scripts" / "check_manifest.py"
+CHECKER = Path(__file__).resolve().parents[2] / "scripts" / "check_manifest.py"
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     ("prefix", "missing"),
     [
@@ -45,7 +44,6 @@ def test_manifest_requires_documentation_and_group(
         assert result.stderr == ""
 
 
-@pytest.mark.integration
 def test_manifest_checks_imported_private_recipes(tmp_path: Path) -> None:
     # Given an imported private helper lacking both required declarations.
     manifest = tmp_path / "justfile"

@@ -36,3 +36,7 @@ jobs:
           uv run --offline --no-sync python --version
       - name: Check repository
         run: just check
+      - name: Test integrations
+        run: just test-integration
+      - name: Test user scenarios
+        run: just test-functional

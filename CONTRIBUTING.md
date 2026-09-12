@@ -47,9 +47,8 @@ synchronizes uv.lock. `UV_PYTHON` selects the matrix interpreter instead of the
 local `.python-version` pin. Keep this matrix aligned with the supported Python
 classifiers in pyproject.toml.
 
-This initial workflow runs the fast checks and tests from `just check`;
-the full integration suite remains available through `just test`. Packaging and
-deployment are not part of this workflow.
+After `just check`, CI runs `just test-integration` and `just test-functional`
+on each matrix interpreter. Packaging and deployment are separate operations.
 
 ## Workflow security
 
@@ -115,6 +114,14 @@ part of this fast check. Structural validity does not establish that instruction
 are correct or useful; review their meaning too.
 
 ## Test structure
+
+Follow the test pyramid: put isolated rules and application cases in `tests/unit`,
+real adapter contracts in `tests/integration`, and a few complete installed-CLI
+journeys in `tests/functional`. Use directories rather than duplicate markers.
+Run a level with `just test-unit`, `just test-integration` or
+`just test-functional`; `just test` runs all levels. `just check` selects only
+unit tests for its fast loop. Favor unit tests for edge cases without enforcing
+an artificial percentage or duplicating coverage across levels.
 
 Structure every test with one standalone `# Given`, `# When`, and `# Then`
 comment, in that order, at the test body's indentation. Add a short explanation

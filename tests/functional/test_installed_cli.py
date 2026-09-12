@@ -9,7 +9,6 @@ from pathlib import Path
 import pytest
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize("module", [False, True])
 def test_installed_entry_points(module: bool, tmp_path: Path) -> None:
     # Given an installed entry point and an empty directory outside the checkout.
