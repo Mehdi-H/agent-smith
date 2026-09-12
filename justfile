@@ -91,10 +91,10 @@ complexity-check:
 dependencies:
     sh scripts/feedback.sh "Dependency checking" "Align imports with runtime dependencies in pyproject.toml, then run just setup." uv run --offline --no-sync deptry src
 
-# Show native pytest output for all tests, with branch coverage and XML/HTML reports.
+# Run all tests with branch coverage, XML/HTML reports and JUnit test results.
 [group("Tests")]
 test:
-    uv run --offline --no-sync pytest --cov-report=xml --cov-report=html || exit 1
+    uv run --offline --no-sync pytest --cov-report=xml --cov-report=html --junitxml=junit.xml -o junit_family=legacy || exit 1
 
 # Run fast unit tests in isolation from files and subprocesses.
 [group("Tests")]

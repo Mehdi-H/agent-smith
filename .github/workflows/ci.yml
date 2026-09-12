@@ -16,6 +16,9 @@ jobs:
     name: Check (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # Authenticate report uploads to Codecov without a stored token.
     strategy:
       fail-fast: false
       matrix:
@@ -37,7 +40,29 @@ jobs:
           uv run --offline --no-sync python --version
       - name: Check repository
         run: just check
-      - name: Test integrations
-        run: just test-integration
-      - name: Test user scenarios
-        run: just test-functional
+      - name: Run all test suites and generate reports
+        run: just test
+      - name: Upload test results to Codecov
+        if: >-
+          !cancelled() && hashFiles('junit.xml') != '' &&
+          github.ref == 'refs/heads/main' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: codecov/test-results-action@0fa95f0e1eeaafde2c782583b36b28ad0d8c77d3 # v1
+        with:
+          use_oidc: true
+          files: junit.xml
+          disable_search: true
+          fail_ci_if_error: true
+          name: python-${{ matrix.python-version }}
+      - name: Upload coverage to Codecov
+        if: >-
+          !cancelled() && hashFiles('coverage.xml') != '' &&
+          github.ref == 'refs/heads/main' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5
+        with:
+          use_oidc: true
+          files: coverage.xml
+          disable_search: true
+          fail_ci_if_error: true
+          name: python-${{ matrix.python-version }}
