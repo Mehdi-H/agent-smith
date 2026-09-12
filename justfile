@@ -194,3 +194,8 @@ publish-pypi:
 [group("Release")]
 release-recover tag:
     sh scripts/release-recover.sh "$1"
+
+# Check annotations from the latest successful main run of each workflow (network and gh auth required).
+[group("Quality")]
+workflow-warnings:
+    sh scripts/feedback.sh "Workflow annotations" "Fix the reported actions, rerun the workflow, then check the latest main run again." sh scripts/workflow-warnings.sh
