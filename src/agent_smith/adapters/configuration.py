@@ -16,6 +16,7 @@ from agent_smith.application.ports import (
     GenerationRequest,
     OverviewSection,
     Section,
+    TechStackSection,
 )
 
 
@@ -64,6 +65,7 @@ class TomlConfiguration:
         output: str | None,
         no_overview: bool,
         no_available_commands: bool = False,
+        no_tech_stack: bool = False,
     ) -> GenerationRequest:
         source = self.directory / (path or "agent-smith.toml")
         data: dict[str, object] = {}
@@ -74,13 +76,20 @@ class TomlConfiguration:
         except (OSError, ValueError) as error:
             raise GenerationError(f"Cannot load configuration {str(source)!r}: {error}") from error
         data = table(
-            data, {"output", "overview", "available_commands", "sections"}, "configuration"
+            data,
+            {"output", "overview", "available_commands", "tech_stack", "sections"},
+            "configuration",
         )
         destination = text(
             output if output is not None else data.get("output", "AGENTS.md"), "output"
         )
         sections = overview_sections(
             data.get("overview", {}), destination, no_overview, self.directory
+        )
+        sections.extend(
+            tech_stack_sections(
+                data.get("tech_stack", {}), self.directory, destination, no_tech_stack
+            )
         )
         sections.extend(
             available_commands_sections(
@@ -122,4 +131,21 @@ def available_commands_sections(value: object, directory: Path, disabled: bool) 
             text(settings.get("title", "Available commands"), "available_commands.title"),
             text(settings.get("command", "just help"), "available_commands.command"),
         )
+    ]
+
+
+def tech_stack_sections(
+    value: object, directory: Path, destination: str, disabled: bool
+) -> list[Section]:
+    settings = table(value, {"enabled", "title", "source"}, "tech_stack")
+    source = text(settings.get("source", "mise.toml"), "tech_stack.source")
+    enabled = settings.get("enabled", (directory / source).is_file())
+    if not isinstance(enabled, bool):
+        raise GenerationError("tech_stack.enabled must be a boolean.")
+    if disabled or not enabled:
+        return []
+    if (directory / source).resolve() == (directory / destination).resolve():
+        raise GenerationError("The output must not overwrite the tech stack source.")
+    return [
+        TechStackSection(text(settings.get("title", "Main tech stack"), "tech_stack.title"), source)
     ]

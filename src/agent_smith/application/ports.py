@@ -21,12 +21,18 @@ class AvailableCommandsSection:
 
 
 @dataclass(frozen=True)
+class TechStackSection:
+    title: str = "Main tech stack"
+    source: str = "mise.toml"
+
+
+@dataclass(frozen=True)
 class CommandSection:
     title: str
     command: str
 
 
-Section = OverviewSection | AvailableCommandsSection | CommandSection
+Section = OverviewSection | AvailableCommandsSection | TechStackSection | CommandSection
 
 
 @dataclass(frozen=True)
@@ -48,6 +54,7 @@ class Configuration(Protocol):
         output: str | None,
         no_overview: bool,
         no_available_commands: bool = False,
+        no_tech_stack: bool = False,
     ) -> GenerationRequest: ...
 
 
@@ -61,6 +68,10 @@ class OverviewParser(Protocol):
 
 class HelpParser(Protocol):
     def render(self, output: str) -> str: ...
+
+
+class TechStackParser(Protocol):
+    def render(self, content: str, /) -> str: ...
 
 
 class CommandRunner(Protocol):
