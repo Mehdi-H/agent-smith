@@ -321,7 +321,22 @@ Analytics. These generated files are ignored by Git.
 Install the Codecov GitHub App for Mehdi-H/agent-smith, sign in to Codecov with
 GitHub, and select this repository. CI uploads coverage and test results using
 OIDC (`use_oidc: true`); do not create a CODECOV_TOKEN secret for this setup.
-Only main runs upload reports: each Python matrix entry uses a distinct name.
+Only Python 3.14 on main uploads coverage and Test Analytics reports.
 All PRs still run all tests but skip Codecov uploads. Upload failures fail the CI job;
 reports are sent after failed tests when files exist and the run was not cancelled.
 The first main upload populates the coverage badge. Codecov does not analyze PRs.
+
+## GitHub Actions warning feedback
+
+Run `just workflow-warnings` to inspect the latest successful run of each workflow on main.
+Authenticate with `gh auth login` first. No run ID is needed.
+The command reads the latest attempt, including paginated job annotations.
+It returns 0 silently for a successful, warning-free run, or 1 with diagnostics
+for warning/failure annotations, missing results and API errors.
+Failed or running pipelines are skipped when selecting runs; this command does
+not replace checking whether the latest CI passed. It requires network
+access and is separate from `just check`.
+
+After correcting an action, merge and let a new main pipeline complete before
+checking again: old annotations are immutable. Codecov uploads run only on main
+with Python 3.14.

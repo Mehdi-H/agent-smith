@@ -1,5 +1,6 @@
 [tools]
 adr-tools = "3.0.0"
+gh = "2.100.0"
 "github:agent-ecosystem/skill-validator" = "1.6.1"
 glow = "3.0.0"
 just = "1.58.0"
