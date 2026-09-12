@@ -11,3 +11,6 @@ htmlcov/
 coverage.xml
 dist/
 .DS_Store
+
+# Local video exports; only the animated GIF is versioned.
+docs/demo/*.mp4

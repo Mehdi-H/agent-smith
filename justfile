@@ -6,6 +6,11 @@ set quiet
 help:
     @just --list
 
+# Record a real CLI demonstration as MP4 and GIF under docs/demo.
+[group("Documentation")]
+demo:
+    sh scripts/record-demo.sh
+
 # Manage architecture decisions with adr-tools (e.g. just adr new Use argparse).
 [group("Decisions")]
 adr +args:
