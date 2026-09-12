@@ -25,6 +25,10 @@ Forget `/init` skill, the output is _deterministic_, repeatable Markdown, you st
 > Agent Smith is available on [PyPI](https://pypi.org/project/agent-smith-cli/).
 > It is under active development; versions remain below 1.0.
 
+> [!TIP]
+> **See the real output: [our generated AGENTS.md](AGENTS.md).**
+> We eat our own dog food: Agent Smith generates this repository's agent
+> instructions from its own project sources.
 
 ![agent-smith creating AGENTS.md on the left, with a live Glow preview on the right](docs/demo/agent-smith.gif)
 
