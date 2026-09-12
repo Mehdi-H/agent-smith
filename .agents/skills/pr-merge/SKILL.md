@@ -25,6 +25,17 @@ Update uv.lock with the version, synchronize the environment and verify
 version. A version bump alone does not authorize publishing a package, creating
 a release or adding release automation.
 
+Complete this checklist before merging:
+
+- [ ] CI is green for the current PR's exact final head, on every supported Python version.
+- [ ] `just check` passes locally on the final changes.
+- [ ] Regenerate the demo with `just demo`, inspect the GIF visually to confirm it is not
+  broken (command, live preview, timing and readability), and commit the refreshed artifacts.
+- [ ] The project version has been bumped in pyproject.toml and uv.lock as described above.
+
+Regenerate and commit the demo before checking final-head CI. A successful recorder
+exit alone does not establish that the GIF renders correctly.
+
 Run the relevant documented just checks and refresh the PR description to match
 the final change and validation. Take the PR out of draft and require successful
 CI on its exact final head, including all supported Python versions. Merge using
