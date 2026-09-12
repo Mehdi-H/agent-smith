@@ -20,8 +20,8 @@ Forget `/init` skill, the output is _deterministic_, repeatable Markdown, you st
 ## Demo
 
 > [!NOTE]
-> The CLI is a development preview. Built-in overview, tech-stack, command and ADR
-> sections are available; no package release has been published yet.
+> Agent Smith is available on [PyPI](https://pypi.org/project/agent-smith-cli/).
+> It is under active development; versions remain below 1.0.
 
 
 ![agent-smith creating AGENTS.md on the left, with a live Glow preview on the right](docs/demo/agent-smith.gif)
@@ -31,12 +31,10 @@ Forget `/init` skill, the output is _deterministic_, repeatable Markdown, you st
 The PyPI distribution is named **`agent-smith-cli`**; the executable remains
 `agent-smith`. The name `agent-smith` was already taken on PyPI.
 
-Agent Smith supports Python 3.10–3.14. No release is available on PyPI yet:
-start from a checkout of this version of the repository and install the CLI
-from its root directory with uv:
+Agent Smith supports Python 3.10–3.14. Install the published CLI from PyPI with uv:
 
 ```sh
-uv tool install .
+uv tool install agent-smith-cli
 ```
 
 This installs the command in an isolated environment.
@@ -48,7 +46,7 @@ This installs the command in an isolated environment.
 Alternatively, install with pip in an activated Python virtual environment:
 
 ```sh
-python -m pip install .
+python -m pip install agent-smith-cli
 ```
 
 ## Run and verify
