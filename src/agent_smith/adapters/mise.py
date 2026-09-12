@@ -1,11 +1,6 @@
 """Render the declared mise tools without running mise or resolving versions."""
 
-import sys
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
+import tomllib
 
 from agent_smith.application.generation import inline_code
 from agent_smith.application.ports import GenerationError

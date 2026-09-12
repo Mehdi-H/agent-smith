@@ -1,7 +1,7 @@
 # Agent Smith 🕶️
 
 [![CI](https://github.com/Mehdi-H/agent-smith/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/Mehdi-H/agent-smith/actions/workflows/release.yml?query=branch%3Amain)
-[![Python 3.10–3.14](https://img.shields.io/badge/python-3.10%E2%80%933.14-blue?logo=python&logoColor=white)](pyproject.toml)
+[![Python 3.11–3.14](https://img.shields.io/badge/python-3.11%E2%80%933.14-blue?logo=python&logoColor=white)](pyproject.toml)
 [![Codecov](https://codecov.io/github/Mehdi-H/agent-smith/branch/main/graph/badge.svg?token=9RYPPL8VLH)](https://codecov.io/github/Mehdi-H/agent-smith)
 [![PyPI](https://img.shields.io/pypi/v/agent-smith-cli)](https://pypi.org/project/agent-smith-cli/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -37,7 +37,7 @@ Forget `/init` skill, the output is _deterministic_, repeatable Markdown, you st
 The PyPI distribution is named **`agent-smith-cli`**; the executable remains
 `agent-smith`. The name `agent-smith` was already taken on PyPI.
 
-Agent Smith supports Python 3.10–3.14. Install the published CLI from PyPI with uv:
+Agent Smith supports Python 3.11–3.14. Install the published CLI from PyPI with uv:
 
 ```sh
 uv tool install agent-smith-cli
@@ -110,7 +110,7 @@ Put a `mise.toml` at your project root with a nonempty `[tools]` table:
 
 ```toml
 [tools]
-python = ["3.14", "3.10"]
+python = ["3.14", "3.11"]
 uv = "latest"
 node = { version = "lts", postinstall = "corepack enable" }
 ```
@@ -120,7 +120,7 @@ Agent Smith automatically adds:
 ```markdown
 ## Main tech stack
 
-- `python` — `3.14`, `3.10`
+- `python` — `3.14`, `3.11`
 - `uv` — `latest`
 - `node` — `lts`
 ```

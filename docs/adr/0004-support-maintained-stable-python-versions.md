@@ -4,7 +4,7 @@ Date: 2026-09-12
 
 ## Status
 
-Accepted
+Superceded by [27. Require Python 3.11 or newer ahead of Python 3.10 end of life](0027-require-python-3-11-or-newer-ahead-of-python-3-10-end-of-life.md)
 
 ## Context
 
