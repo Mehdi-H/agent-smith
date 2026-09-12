@@ -51,6 +51,14 @@ This initial workflow runs the fast checks and tests from `just check`;
 the full integration suite remains available through `just test`. Packaging and
 deployment are not part of this workflow.
 
+## Workflow security
+
+Run `just workflows-check` to audit `.github/workflows` with the mise-pinned
+Zizmor. It is included in `just check` and therefore in pre-commit and CI.
+The audit runs offline, with strict collection so malformed workflows fail
+instead of being skipped. Successful runs are silent; findings retain their
+rule identifiers and source locations. Online audit rules are not run.
+
 ## Git hooks
 
 `just setup` installs Lefthook's pre-commit hook for this checkout. After updating
