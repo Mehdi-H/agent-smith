@@ -27,11 +27,19 @@ def run(
     parser.add_argument(
         "--no-overview", action="store_true", help="Disable the built-in README overview."
     )
+    parser.add_argument(
+        "--no-available-commands",
+        action="store_true",
+        help="Disable the built-in just help section.",
+    )
     invocation = list(sys.argv[1:] if argv is None else argv)
     arguments = parser.parse_args(invocation)
     try:
         request = configuration.load(
-            arguments.config, output=arguments.output, no_overview=arguments.no_overview
+            arguments.config,
+            output=arguments.output,
+            no_overview=arguments.no_overview,
+            no_available_commands=arguments.no_available_commands,
         )
         generator.generate(replace(request, command=shlex.join(["agent-smith", *invocation])))
     except GenerationError as error:

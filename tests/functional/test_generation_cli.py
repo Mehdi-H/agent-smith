@@ -84,3 +84,50 @@ def test_missing_readme_reports_failure_without_output(tmp_path: Path) -> None:
     assert result.returncode == 1
     assert "README.md" in result.stderr
     assert not output.exists()
+
+
+def test_just_help_generates_grouped_commands_without_running_them(tmp_path: Path) -> None:
+    # Given a real justfile whose documented recipe would create a sentinel if executed.
+    (tmp_path / "README.md").write_text("# Demo\n\nOverview.\n")
+    (tmp_path / "justfile").write_text(
+        '# List commands.\n[group("Help")]\nhelp:\n    @just --list\n\n'
+        '# Build the project.\n[group("Build")]\nbuild target="wheel":\n'
+        "    @touch should-not-exist\n"
+    )
+    # When the installed CLI generates the document twice from the real help command.
+    first = invoke(tmp_path)
+    output = tmp_path / "AGENTS.md"
+    content = output.read_bytes()
+    second = invoke(tmp_path)
+    # Then grouped command signatures and provenance are deterministic and recipes did not run.
+    assert first.returncode == second.returncode == 0, first.stderr + second.stderr
+    assert content == output.read_bytes()
+    assert b'## Available commands\n\n### Build\n\n- `just build target="wheel"`' in content
+    assert b"### Help\n\n- `just help`" in content
+    assert b"**`just help`**" in content
+    assert not (tmp_path / "should-not-exist").exists()
+
+
+def test_disabling_available_commands_avoids_executing_help(tmp_path: Path) -> None:
+    # Given a project with a failing help recipe.
+    (tmp_path / "README.md").write_text("# Demo\n\nOverview.\n")
+    (tmp_path / "justfile").write_text("help:\n    @exit 9\n")
+    # When the built-in is explicitly disabled from the CLI.
+    result = invoke(tmp_path, "--no-available-commands")
+    # Then generation succeeds without an available-commands section.
+    assert result.returncode == 0, result.stderr
+    assert "## Available commands" not in (tmp_path / "AGENTS.md").read_text()
+
+
+def test_invalid_help_preserves_existing_document(tmp_path: Path) -> None:
+    # Given a help recipe producing unsupported output and an existing document.
+    (tmp_path / "README.md").write_text("# Demo\n\nOverview.\n")
+    (tmp_path / "justfile").write_text("help:\n    @echo 'Not a recipe list'\n")
+    output = tmp_path / "AGENTS.md"
+    output.write_text("Previous instructions\n")
+    # When the CLI cannot interpret the help output.
+    result = invoke(tmp_path)
+    # Then the error is actionable and the previous document remains intact.
+    assert result.returncode == 1
+    assert "just --list" in result.stderr
+    assert output.read_text() == "Previous instructions\n"

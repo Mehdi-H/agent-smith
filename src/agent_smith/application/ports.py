@@ -15,15 +15,24 @@ class OverviewSection:
 
 
 @dataclass(frozen=True)
+class AvailableCommandsSection:
+    title: str = "Available commands"
+    command: str = "just help"
+
+
+@dataclass(frozen=True)
 class CommandSection:
     title: str
     command: str
 
 
+Section = OverviewSection | AvailableCommandsSection | CommandSection
+
+
 @dataclass(frozen=True)
 class GenerationRequest:
     output: str = "AGENTS.md"
-    sections: tuple[OverviewSection | CommandSection, ...] = (OverviewSection(),)
+    sections: tuple[Section, ...] = (OverviewSection(),)
     command: str = "agent-smith"
 
 
@@ -33,7 +42,12 @@ class Generator(Protocol):
 
 class Configuration(Protocol):
     def load(
-        self, path: str | None, *, output: str | None, no_overview: bool
+        self,
+        path: str | None,
+        *,
+        output: str | None,
+        no_overview: bool,
+        no_available_commands: bool = False,
     ) -> GenerationRequest: ...
 
 
@@ -43,6 +57,10 @@ class TextReader(Protocol):
 
 class OverviewParser(Protocol):
     def extract(self, markdown: str) -> str: ...
+
+
+class HelpParser(Protocol):
+    def render(self, output: str) -> str: ...
 
 
 class CommandRunner(Protocol):
