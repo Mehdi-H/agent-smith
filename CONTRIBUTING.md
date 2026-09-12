@@ -48,6 +48,16 @@ is the content. Do not wrap those producers in the silent feedback wrapper.
 Instructions and ADRs guide work before execution; these checks provide feedback
 after execution.
 
+## Skill structure
+
+Run `just skills-check` to validate `.agents/skills`, or `just skills-check PATH`
+for a single skill or another collection. This check is included in `just check`.
+The mise-pinned skill-validator checks local metadata, structure, Markdown fences
+and internal references. Strict mode treats warnings as failures; the shared
+wrapper keeps successful runs silent. Remote link checks and LLM scoring are not
+part of this fast check. Structural validity does not establish that instructions
+are correct or useful; review their meaning too.
+
 ## Test structure
 
 Structure every test with one standalone `# Given`, `# When`, and `# Then`
