@@ -2,6 +2,32 @@
 
 <!-- version list -->
 
+## v0.5.0 (2026-09-12)
+
+### Chores
+
+- Check dependency updates with a seven-day Python cooldown 🧹
+  ([`ee124ff`](https://github.com/Mehdi-H/agent-smith/commit/ee124ff84c1671b949b7de091d3ed0a731ceb3de))
+
+- Share agent instructions with Claude Code via symlink 🧹
+  ([`f5e76f6`](https://github.com/Mehdi-H/agent-smith/commit/f5e76f6dd0069700e5bddbd296ce9fe0d8fdb37e))
+
+### Continuous Integration
+
+- Report workflow warnings and replace deprecated Codecov actions 🔧
+  ([`68e1806`](https://github.com/Mehdi-H/agent-smith/commit/68e18065073bbe8857ff9dbb38f20df6f7c9014f))
+
+### Documentation
+
+- Illustrate the README overview 📝
+  ([`49258b7`](https://github.com/Mehdi-H/agent-smith/commit/49258b7df071c6d872a4f677a293baaeff75dcbf))
+
+### Features
+
+- Omit images and badges from generated overviews ✨
+  ([`60698be`](https://github.com/Mehdi-H/agent-smith/commit/60698be9e6f47b55857bb753b92114125861b04a))
+
+
 ## v0.4.0 (2026-09-12)
 
 ### Continuous Integration
