@@ -6,7 +6,10 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
-dependencies = []
+dependencies = [
+    "markdown-it-py>=4,<5",
+    "tomli>=2 ; python_full_version < '3.11'",
+]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Environment :: Console",
@@ -53,6 +56,11 @@ error-on-warning = true
 
 [tool.deptry]
 github_warning_errors = []
+
+[tool.deptry.per_rule_ignores]
+# tomllib is stdlib on 3.11+ and only imported behind a version guard.
+# On 3.10, deptry scans that inactive branch; the runtime uses declared tomli.
+DEP001 = ["tomllib"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -24,7 +24,7 @@ def verify() -> None:
         python = binaries / ("python.exe" if os.name == "nt" else "python")
         executable = binaries / ("agent-smith.exe" if os.name == "nt" else "agent-smith")
         subprocess.run(
-            ["uv", "pip", "install", "--python", str(python), "--no-deps", str(wheel)],
+            ["uv", "pip", "install", "--python", str(python), str(wheel)],
             check=True,
             cwd=root,
         )
@@ -40,6 +40,13 @@ def verify() -> None:
             if result.stdout != f"agent-smith {expected_version}\n" or result.stderr:
                 raise RuntimeError(f"Unexpected version output: {result}")
             subprocess.run([*command, "--help"], check=True, cwd=root, timeout=10)
+            (root / "README.md").write_text(
+                "# Example\n\nAn overview.\n\n## Usage\n", encoding="utf-8"
+            )
+            subprocess.run(command, check=True, cwd=root, timeout=10)
+            generated = (root / "AGENTS.md").read_text(encoding="utf-8")
+            if "## Overview\n\nAn overview." not in generated:
+                raise RuntimeError(f"Unexpected generated document: {generated}")
     print("Wheel installation and both entry points verified.")
 
 
