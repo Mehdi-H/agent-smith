@@ -13,7 +13,8 @@ class ShellCommandRunner:
         try:
             result = subprocess.run(
                 command,
-                shell=True,
+                # Custom extractors are explicitly trusted shell commands, not data inputs.
+                shell=True,  # nosec B602
                 capture_output=True,
                 text=True,
                 encoding="utf-8",

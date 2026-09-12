@@ -50,7 +50,7 @@ build:
 
 # Check lint, formatting, types, dependencies and fast tests without network or sync.
 [group("Quality")]
-check: lint types dependencies complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check
+check: lint types dependencies bandit-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check
     sh scripts/feedback.sh "Unit tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q tests/unit
 
 # Check Python lint rules and Python/justfile formatting without changing files.
@@ -139,3 +139,13 @@ package-check:
 [group("Tests")]
 tests-pyramid:
     uv run --offline --no-sync python scripts/tests_pyramid.py
+
+# Audit Python source and tooling for medium/high severity security findings.
+[group("Quality")]
+bandit-check:
+    sh scripts/feedback.sh "Bandit" "Fix the reported security issue; keep exceptions narrow and justified." uv run --offline --no-sync bandit -r src scripts --severity-level medium
+
+# Audit locked Python dependencies for known vulnerabilities (network required).
+[group("Quality")]
+audit-check:
+    sh scripts/feedback.sh "pip-audit" "Update vulnerable dependencies and uv.lock, or resolve the reported network error." sh scripts/check_audit.sh

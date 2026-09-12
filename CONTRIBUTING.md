@@ -87,6 +87,29 @@ The audit runs offline, with strict collection so malformed workflows fail
 instead of being skipped. Successful runs are silent; findings retain their
 rule identifiers and source locations. Online audit rules are not run.
 
+## Python security feedback
+
+`just bandit-check` scans Python application code and repository scripts with
+Bandit. It is included in `just check` and fails on medium/high severity findings.
+Low severity subprocess notices remain available through
+`uv run --no-sync bandit -r src scripts`. Tests are outside this static-analysis
+scope. The shell runner has one narrowly documented B602 exception: running
+explicitly trusted user-configured shell commands is its intended contract.
+
+`just audit-check` exports all runtime and development dependencies from uv.lock
+into a temporary requirements file with hashes and audits their pinned versions with
+[pip-audit](https://github.com/pypa/pip-audit), maintained by the PyPA. It needs
+network access to the public vulnerability database, but no account or API key.
+Dependency resolution and package installation are disabled during the audit;
+the export comes from the existing lockfile. Environment markers select the
+dependencies applicable to the interpreter/platform running the audit. The wrapper preserves diagnostics
+and maps findings or operational errors to exit 1, with silent success.
+
+The audit stays separate from `just check`, pre-commit and CI to keep the fast
+check offline. Run it explicitly when network access is available. Bandit and
+pip-audit are development dependencies locked by uv; neither is installed for
+CLI consumers. See [the security feedback decision](docs/adr/0020-audit-python-security-with-bandit-and-pip-audit-feedback-checks.md).
+
 ## Git hooks
 
 `just setup` installs Lefthook's pre-commit hook for this checkout. After updating
