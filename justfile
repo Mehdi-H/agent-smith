@@ -45,7 +45,7 @@ build:
 
 # Check lint, formatting, types, dependencies and fast tests without network or sync.
 [group("Quality")]
-check: lint types dependencies test-structure manifest-check skills-check
+check: lint types dependencies test-structure manifest-check skills-check workflows-check
     sh scripts/feedback.sh "Fast tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q -m "not integration"
 
 # Check Python lint rules and Python/justfile formatting without changing files.
@@ -59,6 +59,11 @@ lint:
 [group("Quality")]
 manifest-check *paths:
     sh scripts/feedback.sh "Usage manifest" "Add the missing recipe comments and group attributes." uv run --offline --no-sync python scripts/check_manifest.py "$@"
+
+# Audit GitHub Actions security offline, failing on malformed workflows too.
+[group("Quality")]
+workflows-check:
+    sh scripts/feedback.sh "Workflow security" "Fix the Zizmor findings in .github/workflows; inspect the reported rule and location." zizmor --offline --strict-collection --no-progress .github/workflows
 
 # Validate local skill structure strictly (optional skill or collection directory).
 [group("Quality")]
