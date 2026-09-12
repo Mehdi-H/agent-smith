@@ -1,0 +1,10 @@
+lefthook: mise exec -- lefthook
+
+pre-commit:
+  commands:
+    check:
+      priority: 1
+      run: mise exec -- just check
+    cli:
+      priority: 2
+      run: mise exec -- just cli-check

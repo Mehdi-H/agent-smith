@@ -11,11 +11,27 @@ help:
 adr +args:
     adr "$@"
 
-# Install the pinned Python and synchronize the project from uv.lock.
+# Install Python, synchronize uv.lock dependencies and install Git hooks.
 [group("Environment")]
 setup:
     uv python install
     uv sync --locked
+    just hooks-install
+
+# Install the repository's Lefthook Git hooks in this checkout.
+[group("Hooks")]
+hooks-install:
+    mise exec -- lefthook install
+
+# Run the pre-commit checks manually without creating a commit.
+[group("Hooks")]
+hooks-check:
+    mise exec -- lefthook run pre-commit --force
+
+# Verify the installed agent-smith command starts successfully without arguments.
+[group("Quality")]
+cli-check:
+    sh scripts/feedback.sh "Agent Smith CLI" "Run just setup for installation issues, or fix the CLI failure reported below." uv run --offline --no-sync agent-smith
 
 # Run the CLI from the installed development environment.
 [group("Environment")]
