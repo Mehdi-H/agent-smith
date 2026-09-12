@@ -33,6 +33,24 @@ def text(value: object, name: str) -> str:
     return value
 
 
+def overview_sections(
+    value: object, destination: str, no_overview: bool
+) -> list[OverviewSection | CommandSection]:
+    overview = table(value, {"enabled", "source", "title"}, "overview")
+    enabled = overview.get("enabled", True)
+    if not isinstance(enabled, bool):
+        raise GenerationError("overview.enabled must be a boolean.")
+    sections: list[OverviewSection | CommandSection] = []
+    if enabled and not no_overview:
+        readme = text(overview.get("source", "README.md"), "overview.source")
+        if Path(readme).resolve() == Path(destination).resolve():
+            raise GenerationError("The output must not overwrite the overview source.")
+        sections.append(
+            OverviewSection(text(overview.get("title", "Overview"), "overview.title"), readme)
+        )
+    return sections
+
+
 class TomlConfiguration:
     def load(self, path: str | None, *, output: str | None, no_overview: bool) -> GenerationRequest:
         source = Path(path or "agent-smith.toml")
@@ -47,18 +65,7 @@ class TomlConfiguration:
         destination = text(
             output if output is not None else data.get("output", "AGENTS.md"), "output"
         )
-        overview = table(data.get("overview", {}), {"enabled", "source", "title"}, "overview")
-        enabled = overview.get("enabled", True)
-        if not isinstance(enabled, bool):
-            raise GenerationError("overview.enabled must be a boolean.")
-        sections: list[OverviewSection | CommandSection] = []
-        if enabled and not no_overview:
-            readme = text(overview.get("source", "README.md"), "overview.source")
-            if Path(readme).resolve() == Path(destination).resolve():
-                raise GenerationError("The output must not overwrite the overview source.")
-            sections.append(
-                OverviewSection(text(overview.get("title", "Overview"), "overview.title"), readme)
-            )
+        sections = overview_sections(data.get("overview", {}), destination, no_overview)
         custom = data.get("sections", [])
         if not isinstance(custom, list):
             raise GenerationError("sections must be an array of TOML tables.")
