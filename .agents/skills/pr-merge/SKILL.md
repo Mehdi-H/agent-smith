@@ -1,6 +1,6 @@
 ---
 name: pr-merge
-description: Prepare and merge a repository pull request, checking its version bump, atomic history and CI before rebasing into main.
+description: Prepare and merge a repository pull request, checking its release policy, atomic history and CI before rebasing into main.
 ---
 
 Merge only when the user has authorized it. That authorization covers the
@@ -12,18 +12,12 @@ an earlier change, while retaining independent atomic Conventional Commits.
 Before rewriting history, keep a local backup and verify that the resulting
 file tree is unchanged. Push rewritten history with an explicit force-with-lease.
 
-Before merging a product change, compare `[project].version` in pyproject.toml
-against the PR base. Include the version bump in this PR: increment the minor
-version for a new feature and the patch version for a compatible fix. Honor a
-version explicitly chosen by the user. For breaking changes, settle the intended
-version before proceeding; the pre-1.0 breaking-change policy is not yet defined.
-Do not bump again if this PR already contains the appropriate increase, and do
-not invent a product release for documentation-only or tooling-only changes.
-
-Update uv.lock with the version, synchronize the environment and verify
-`agent-smith --version` through uv. Update any documentation that states the
-version. A version bump alone does not authorize publishing a package, creating
-a release or adding release automation.
+Versioning is automated by Python Semantic Release on main. Do not manually bump
+pyproject.toml or uv.lock in feature PRs. Review Conventional Commits: feat bumps
+minor, fix/perf bump patch, and breaking changes bump minor while below 1.0.
+Documentation and tooling alone do not trigger a release. A transition to 1.0
+requires an explicit maintainer decision. Check the release workflow after merge;
+report failed publication separately from a successful merge.
 
 Complete this checklist before merging:
 
@@ -31,7 +25,7 @@ Complete this checklist before merging:
 - [ ] `just check` passes locally on the final changes.
 - [ ] Regenerate the demo with `just demo`, inspect the GIF visually to confirm it is not
   broken (command, live preview, timing and readability), and commit the refreshed artifacts.
-- [ ] The project version has been bumped in pyproject.toml and uv.lock as described above.
+- [ ] Commit messages express the intended release level; version files stay synchronized.
 
 Regenerate and commit the demo before checking final-head CI. A successful recorder
 exit alone does not establish that the GIF renders correctly.

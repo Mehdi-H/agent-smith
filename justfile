@@ -20,7 +20,7 @@ adr +args:
 [group("Environment")]
 setup:
     uv python install
-    uv sync --locked
+    uv sync --locked --group release
     just hooks-install
 
 # Install the repository's Lefthook Git hooks in this checkout.
@@ -46,6 +46,7 @@ run *args:
 # Build a source distribution and a wheel using the uv backend.
 [group("Packaging")]
 build:
+    rm -f dist/*.whl dist/*.tar.gz
     uv build --no-sources
 
 # Check lint, formatting, types, dependencies and fast tests without network or sync.
@@ -154,3 +155,42 @@ audit-check:
 [group("Quality")]
 shellcheck-check:
     sh scripts/feedback.sh "ShellCheck" "Fix the shell diagnostics at the reported files and lines." find scripts -type f \( -name '*.sh' -o -name '*.bash' \) -exec shellcheck {} +
+
+# Preview committed changes as main in a disposable clone without publishing.
+[group("Release")]
+release-preview:
+    uv run --locked --group release sh scripts/release-preview.sh
+
+# Synchronize the stamped version and build verified release distributions.
+[group("Release")]
+release-build:
+    uv lock --upgrade-package agent-smith-cli
+    just build
+    just distributions-check
+
+# Verify the exact wheel and sdist in dist before publication.
+[group("Release")]
+distributions-check:
+    uv run --offline --no-sync python scripts/check_distributions.py
+
+# Create the next semantic release from the checked main workflow.
+[group("Release")]
+release:
+    sh scripts/release.sh
+
+# Upload the built distributions to the current GitHub release.
+[group("Release")]
+publish-github:
+    sh scripts/release-guard.sh
+    uv run --locked --group release semantic-release publish
+
+# Publish verified distributions to PyPI through the main workflow's OIDC identity.
+[group("Release")]
+publish-pypi:
+    sh scripts/release-guard.sh
+    uv publish --trusted-publishing always --check-url https://pypi.org/simple/ dist/*.whl dist/*.tar.gz
+
+# Recover existing release assets for a PyPI retry without another version bump.
+[group("Release")]
+release-recover tag:
+    sh scripts/release-recover.sh "$1"
