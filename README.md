@@ -8,24 +8,40 @@ operations and configuration, with `AGENTS.md` as the default output.
 **Status:** the development harness and installable CLI are available. Document
 generation is not implemented yet, and no package release has been published.
 
-## Getting started
+## Install
 
-Install [mise](https://mise.jdx.dev/) and clone this repository, then run:
+Agent Smith supports Python 3.10–3.14. No release is available on PyPI yet:
+start from a checkout of this version of the repository and install the CLI
+from its root directory with uv:
 
 ```sh
-mise trust
-mise install
-mise exec -- just setup
-mise exec -- just run --help
-mise exec -- just run --version
+uv tool install .
 ```
 
-If mise is activated in your shell, you can call `just` directly. Run `just` for
-the list of documented operations. `just build` produces a wheel and source
-distribution in `dist/`; the package uses standard Python packaging metadata and
-can be installed with pip or uv. It targets Python 3.10–3.14.
+This installs the command in an isolated environment. If uv reports that its
+tool directory is missing from your PATH, run `uv tool update-shell` and restart
+your terminal.
+
+Alternatively, install with pip in an activated Python virtual environment:
+
+```sh
+python -m pip install .
+```
+
+## Run and verify
+
+```sh
+agent-smith --version
+agent-smith --help
+agent-smith
+```
+
+`--version` should print `agent-smith 0.0.0`, the current unreleased version.
+`--help` displays the available options. Both commands should exit successfully.
+Running `agent-smith` without arguments currently displays the same help;
+it does not create an `AGENTS.md` file yet.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow, commit
+See [CONTRIBUTING.md](CONTRIBUTING.md) for repository setup, development commands, commit
 conventions and just-in-time architecture decisions. The license is [MIT](LICENSE).

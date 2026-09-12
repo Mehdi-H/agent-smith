@@ -3,7 +3,7 @@ set quiet
 
 # List the repository's documented operations.
 [group("Help")]
-default:
+help:
     @just --list
 
 # Manage architecture decisions with adr-tools (e.g. just adr new Use argparse).
