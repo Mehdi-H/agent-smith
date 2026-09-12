@@ -2,6 +2,45 @@
 
 <!-- version list -->
 
+## v0.4.0 (2026-09-12)
+
+### Continuous Integration
+
+- Upload coverage and test analytics to Codecov with OIDC 🔧
+  ([`2fc4167`](https://github.com/Mehdi-H/agent-smith/commit/2fc41672adf46573e44b7b3f88bb883a644be520))
+
+- Use Node 24 artifact actions 🔧
+  ([`af5b884`](https://github.com/Mehdi-H/agent-smith/commit/af5b8848e4590ecd90114b88d367e98d30110ece))
+
+### Documentation
+
+- Explain repeated TOML tables for custom sections 📝
+  ([`accff0f`](https://github.com/Mehdi-H/agent-smith/commit/accff0f5bfaf15c3d295c4c29095a10fddc8e7ad))
+
+- Highlight our generated agent instructions in the demo 📝
+  ([`734bada`](https://github.com/Mehdi-H/agent-smith/commit/734badaa3c32784c741ca971a85dd6e0bc814d36))
+
+- Install the published CLI from PyPI 📝
+  ([`a6a8614`](https://github.com/Mehdi-H/agent-smith/commit/a6a8614da5c115d417864caa527dbad7ed5ea593))
+
+- Show Codecov and PyPI badges and refresh demo 📝
+  ([`654eb16`](https://github.com/Mehdi-H/agent-smith/commit/654eb16bf623d88e7be6538752b1f02efbceead7))
+
+### Features
+
+- Require Python 3.11 or newer ✨
+  ([`6863cc9`](https://github.com/Mehdi-H/agent-smith/commit/6863cc9dea458404a27536c5761aedbaeb9d6689))
+
+### Testing
+
+- Exercise lock refresh after every release ✅
+  ([`4b0441a`](https://github.com/Mehdi-H/agent-smith/commit/4b0441abccddeae9e76f54111936f8a3eda5123c))
+
+### Breaking Changes
+
+- Python 3.10 is no longer supported. Upgrade to Python 3.11 or newer to install future releases.
+
+
 ## v0.3.1 (2026-09-12)
 
 ### Build System
