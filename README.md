@@ -6,12 +6,12 @@
 
 Build agent instructions from your project's sources.
 
-Agent Smith will assemble deterministic Markdown from documented project
-operations and configuration, with `AGENTS.md` as the default output.
+Agent Smith assembles deterministic Markdown from your README and custom
+commands, with `AGENTS.md` as the default output.
 
 > [!NOTE]
-> The CLI is available as a development preview. Document generation is not
-> implemented yet, and no package release has been published.
+> The CLI is a development preview. README overview generation and custom
+> command sections are available; no package release has been published yet.
 
 ## Install
 
@@ -47,8 +47,68 @@ agent-smith
 > To confirm installation, check that `--version` prints `agent-smith 0.0.0`
 > and `--help` displays the available options. Both should exit successfully.
 
-Running `agent-smith` without arguments currently displays the same help;
-it does not create an `AGENTS.md` file yet.
+Run `agent-smith` from your project's directory to generate `AGENTS.md`. By
+default, it extracts the introduction between the first top-level H1 and the
+next H2 in `README.md`, preserving its Markdown, badges and alerts. If there is
+no following H2, the overview extends to the end of the file. Missing headings
+or an empty overview produce an error.
+
+The output contains an H1 with the filename, an `Overview` H2, the extracted
+content and a quoted provenance footer with the `agent-smith` command and its
+CLI arguments. Rerunning that command regenerates the document using the same
+configuration, from the same working directory. Successful generation is silent.
+
+```sh
+agent-smith --output instructions.md
+```
+
+## Configure sections
+
+An optional `agent-smith.toml` configures the built-in overview and custom
+sections. For example, to keep the overview and append tracked files:
+
+```toml
+output = "AGENTS.md"
+
+[overview]
+enabled = true
+source = "README.md"
+title = "Overview"
+
+[[sections]]
+title = "Tracked files"
+command = "git ls-files"
+```
+
+Each custom section uses its command's UTF-8 stdout as Markdown, followed by a
+footer with the exact command. Sections appear in configuration order after the
+built-in overview. To replace the built-in with your own extractor:
+
+```toml
+[overview]
+enabled = false
+
+[[sections]]
+title = "Overview"
+command = "./scripts/my-overview.sh"
+```
+
+Supply your own script for that command. You can also disable the built-in with
+`--no-overview`, and select another configuration with `--config path/to/config.toml`.
+`--output` takes precedence over configuration. Paths and command working
+directories are relative to where you invoke the CLI, including with `--config`.
+The output's parent directory must exist.
+
+> [!WARNING]
+> Custom commands run in your platform's shell with your permissions. Only use
+> trusted configurations. If extraction or writing fails, Agent Smith preserves
+> the existing output file; side effects of custom scripts are not rolled back.
+
+> [!NOTE]
+> Identical configuration and extractor outputs produce identical Markdown.
+> Variable command output, such as timestamps, remains variable. Extraction
+> preserves relative links and does not copy reference definitions from outside
+> the overview. No Markdown formatter is applied.
 
 ## Contributing
 

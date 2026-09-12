@@ -28,10 +28,10 @@ hooks-install:
 hooks-check:
     mise exec -- lefthook run pre-commit --force
 
-# Verify the installed agent-smith command starts successfully without arguments.
+# Verify CLI startup through help without generating a file during pre-commit.
 [group("Quality")]
 cli-check:
-    sh scripts/feedback.sh "Agent Smith CLI" "Run just setup for installation issues, or fix the CLI failure reported below." uv run --offline --no-sync agent-smith
+    sh scripts/feedback.sh "Agent Smith CLI" "Run just setup for installation issues, or fix the CLI failure reported below." uv run --offline --no-sync agent-smith --help
 
 # Run the CLI from the installed development environment.
 [group("Environment")]

@@ -63,9 +63,9 @@ rule identifiers and source locations. Online audit rules are not run.
 `just setup` installs Lefthook's pre-commit hook for this checkout. After updating
 an existing checkout, run `mise install` and `just hooks-install` to enable it.
 Every commit runs `just check` and `just cli-check`; a failure blocks the commit.
-`just cli-check` invokes the installed `agent-smith` command without arguments,
-through uv, offline and without synchronizing dependencies. It currently checks
-startup and a successful exit; document generation is not implemented yet.
+`just cli-check` invokes the installed `agent-smith --help` command through uv,
+offline and without synchronizing dependencies. This verifies startup without
+generating an output file as a side effect of committing.
 
 Run `just hooks-check` to execute the hook manually. Lefthook displays a progress
 summary while successful checks stay quiet.
@@ -140,8 +140,8 @@ projects using Agent Smith.
 ## Architecture
 
 Keep argparse in the CLI adapter and wire dependencies in the composition root.
-As generation is implemented, define small typed ports next to the application
-capability that owns them, with `typing.Protocol`. Application code must not
+The generation application owns typed ports for its inputs and effectful
+adapters, using `typing.Protocol`. Application code must not
 import CLI or infrastructure adapters. Inject implementations for process and
 filesystem access, and test the core with in-memory implementations. Do not add
 unused ports or empty layers before a capability needs them.
