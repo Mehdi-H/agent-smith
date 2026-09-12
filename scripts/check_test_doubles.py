@@ -11,7 +11,9 @@ def check(directory: Path) -> int:
     failed = False
     for path in sorted(directory.rglob("*.py")):
         for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            if FORBIDDEN.search(line):
+            # A literal semantic-version CLI flag is not a replacement API.
+            inspected = re.sub(r"([\"'])--patch\1", "", line)
+            if FORBIDDEN.search(inspected):
                 print(
                     f"{path}:{number}: forbidden test replacement: {line.strip()}", file=sys.stderr
                 )

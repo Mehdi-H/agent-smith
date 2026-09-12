@@ -43,6 +43,9 @@ dev = [
     "ruff>=0.16.7",
     "ty>=0.0.80",
 ]
+release = [
+    "python-semantic-release==10.6.2",
+]
 
 [tool.uv.build-backend]
 module-name = "agent_smith"
@@ -79,3 +82,35 @@ patch = ["subprocess"]
 
 [tool.coverage.report]
 show_missing = true
+
+[tool.semantic_release]
+allow_zero_version = true
+major_on_zero = false
+commit_parser = "conventional"
+version_toml = ["pyproject.toml:project.version"]
+tag_format = "v{version}"
+commit_message = "chore(release): {version} 📦"
+build_command = "just release-build"
+assets = ["uv.lock"]
+
+[tool.semantic_release.branches.main]
+match = "^main$"
+prerelease = false
+
+[tool.semantic_release.commit_parser_options]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+
+[tool.semantic_release.changelog]
+mode = "update"
+
+[tool.semantic_release.changelog.default_templates]
+changelog_file = "CHANGELOG.md"
+
+[tool.semantic_release.publish]
+dist_glob_patterns = ["dist/*.whl", "dist/*.tar.gz"]
+
+[tool.uv]
+# PSR 10.6.2's ~=8.1.0 cap selects Click affected by PYSEC-2026-2132.
+# Keep the upstream <8.5 ceiling; exercise PSR's real CLI in integration tests.
+override-dependencies = ["click>=8.3.3,<8.5"]
