@@ -14,6 +14,10 @@ The output is deterministic Markdown.
 > The CLI is a development preview. Built-in overview and available-command
 > sections are available; no package release has been published yet.
 
+## Demo
+
+![agent-smith creating AGENTS.md on the left, with a live Glow preview on the right](docs/demo/agent-smith.gif)
+
 ## Install
 
 Agent Smith supports Python 3.10–3.14. No release is available on PyPI yet:

@@ -39,6 +39,35 @@ the coverage summary. Line and branch coverage reports are also available in
 environment outside the checkout. These checks are more expensive than the fast
 loop. Never silence warnings to make a check pass without addressing their cause.
 
+## Record the terminal demo
+
+After `just setup`, run `just demo` from the repository root. It uses VHS to
+record the actual `agent-smith` command, waits for completion, checks its exit
+status and shows two tmux panes side by side. On the left, `rm -f AGENTS.md`
+starts from no generated file, then `agent-smith` creates it. On the right,
+`watch` refreshes the Glow rendering every half second. If recording fails,
+the previous AGENTS.md is restored (or removed if it did not exist). It writes
+`docs/demo/agent-smith.mp4` and
+`docs/demo/agent-smith.gif`; only the GIF is versioned and embedded in the README.
+The MP4 is a local export ignored by Git. This also
+regenerates AGENTS.md, so review that diff with the recording.
+
+VHS, Glow and tmux are pinned in mise.toml. Recording also requires FFmpeg,
+ttyd and procps `watch` on PATH. On macOS, install them with
+`brew install ffmpeg ttyd watch`; on Debian/Ubuntu, use your package manager's
+`ffmpeg`, `ttyd` and `procps` packages. The recorder uses a private tmux server
+and closes it on exit, leaving existing terminal sessions alone. VHS may download a browser
+on its first run. These media tools are not needed to use Agent Smith.
+
+Edit `docs/demo/agent-smith.tape` to change the timing and commands,
+`scripts/demo-layout.sh` for the panes, and `scripts/demo-preview.sh` for the
+live preview. The preview removes terminal hyperlink metadata unsupported by
+`watch`, while preserving the rendered text and colors. The Glow style in
+`docs/demo/glow.json` uses ANSI colors compatible with watch, keeps link labels and hides long URL destinations for readability. Review the generated
+GIF for readability and commit it with the scenario and Glow style. Rendering is
+an explicit documentation task, not part of `just check`, pre-commit or CI.
+The generated video is not expected to be byte-identical across platforms.
+
 ## Continuous integration
 
 GitHub Actions runs `just check` on pull requests and pushes to `main`, using

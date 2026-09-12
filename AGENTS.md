@@ -24,6 +24,10 @@ The output is deterministic Markdown.
 
 - `just adr +args` — Manage architecture decisions with adr-tools (e.g. just adr new Use argparse).
 
+### Documentation
+
+- `just demo` — Record a real CLI demonstration as MP4 and GIF under docs/demo.
+
 ### Environment
 
 - `just run *args` — Run the CLI from the installed development environment.
