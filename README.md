@@ -28,6 +28,9 @@ Forget `/init` skill, the output is _deterministic_, repeatable Markdown, you st
 
 ## Install
 
+The PyPI distribution is named **`agent-smith-cli`**; the executable remains
+`agent-smith`. The name `agent-smith` was already taken on PyPI.
+
 Agent Smith supports Python 3.10–3.14. No release is available on PyPI yet:
 start from a checkout of this version of the repository and install the CLI
 from its root directory with uv:

@@ -26,7 +26,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         AdrListParser(),
     )
     return run(
-        argv, version=version("agent-smith"), configuration=TomlConfiguration(), generator=generator
+        argv,
+        version=version("agent-smith-cli"),
+        configuration=TomlConfiguration(),
+        generator=generator,
     )
 
 
