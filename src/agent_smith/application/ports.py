@@ -27,12 +27,23 @@ class TechStackSection:
 
 
 @dataclass(frozen=True)
+class ArchitectureDecisionsSection:
+    title: str = "Architecture decisions"
+
+
+@dataclass(frozen=True)
 class CommandSection:
     title: str
     command: str
 
 
-Section = OverviewSection | AvailableCommandsSection | TechStackSection | CommandSection
+Section = (
+    OverviewSection
+    | AvailableCommandsSection
+    | TechStackSection
+    | ArchitectureDecisionsSection
+    | CommandSection
+)
 
 
 @dataclass(frozen=True)
@@ -55,6 +66,7 @@ class Configuration(Protocol):
         no_overview: bool,
         no_available_commands: bool = False,
         no_tech_stack: bool = False,
+        no_architecture_decisions: bool = False,
     ) -> GenerationRequest: ...
 
 
@@ -72,6 +84,10 @@ class HelpParser(Protocol):
 
 class TechStackParser(Protocol):
     def render(self, content: str, /) -> str: ...
+
+
+class DecisionListParser(Protocol):
+    def render(self, directory: str, listing: str) -> str: ...
 
 
 class CommandRunner(Protocol):

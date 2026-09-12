@@ -7,14 +7,14 @@
 Build agent instructions from your project's sources.
 
 Run `agent-smith` at your project root to generate **`AGENTS.md`** from your
-README overview, your documented just commands, your mise tool declarations and
-optional custom extractors.
+README overview, your mise tool declarations, documented just commands,
+architecture decision filenames and optional custom extractors.
 The output is deterministic Markdown.
 
 ## Demo
 
 > [!NOTE]
-> The CLI is a development preview. Built-in overview, available-command and tech-stack
+> The CLI is a development preview. Built-in overview, tech-stack, command and ADR
 > sections are available; no package release has been published yet.
 
 
@@ -169,10 +169,41 @@ If help fails or does not produce the supported list format, generation fails
 and the existing `AGENTS.md` is preserved. Custom help formats can be supplied
 as Markdown through a custom section instead.
 
+### Architecture decisions: an ADR directory declared in .adr-dir
+
+Use [adr-tools](https://github.com/npryce/adr-tools) and a root `.adr-dir` containing
+the path to your decisions directory, for example `docs/adr`. When that file exists,
+Agent Smith runs `adr list` and adds a compact index:
+
+```markdown
+## Architecture decisions
+
+Directory: `docs/adr`
+
+- `0001-record-architecture-decisions`
+- `0002-use-python`
+```
+
+The directory appears once, using the content of `.adr-dir`. Each bullet contains
+only a filename without its final `.md` extension: numbers, hyphens and ordering
+from `adr list` are preserved. ADR contents and their Markdown headings are never
+read. Use meaningful filenames so the index conveys decisions without loading
+individual records. All records listed by adr-tools are included; their status
+is not inferred from their filenames.
+
+The footer names `adr list`. The command must be installed and runnable from the
+project root, and its listed paths must match `.adr-dir`. With no `.adr-dir`, this
+section is omitted. Empty or invalid metadata, a failed command or unsupported
+output fails generation while preserving the existing document.
+
+Use `--no-architecture-decisions` or `[architecture_decisions].enabled = false`
+to disable this built-in, and `title` to rename its heading. Setting `enabled = true`
+explicitly requires `.adr-dir` even if it was not detected automatically.
+
 ## Configure sections
 
 An optional root `agent-smith.toml` customizes built-in sections and adds custom
-extractors. For example, to enable the three built-ins and append tracked files:
+extractors. For example, to enable the four built-ins and append tracked files:
 
 ```toml
 output = "AGENTS.md"
@@ -192,6 +223,10 @@ enabled = true
 source = "mise.toml"
 title = "Main tech stack"
 
+[architecture_decisions]
+enabled = true
+title = "Architecture decisions"
+
 [[sections]]
 title = "Tracked files"
 command = "git ls-files"
@@ -199,7 +234,7 @@ command = "git ls-files"
 
 Each custom section uses its command's UTF-8 stdout as Markdown, followed by a
 footer with the exact command. Sections appear in configuration order after the
-built-in overview, main tech stack and available commands. Set `[available_commands].enabled = false`
+built-in overview, main tech stack, available commands and architecture decisions. Set `[available_commands].enabled = false`
 to disable command discovery, or change its `command` to another source of
 standard just list output, such as `just --list`. Explicit `enabled = true`
 requires the command to work even if no root justfile was detected.

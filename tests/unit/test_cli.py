@@ -10,7 +10,9 @@ from agent_smith.application.ports import GenerationError, GenerationRequest
 
 @dataclass
 class Services:
-    loaded: list[tuple[str | None, str | None, bool, bool, bool]] = field(default_factory=list)
+    loaded: list[tuple[str | None, str | None, bool, bool, bool, bool]] = field(
+        default_factory=list
+    )
     generated: list[GenerationRequest] = field(default_factory=list)
     failure: bool = False
 
@@ -22,8 +24,18 @@ class Services:
         no_overview: bool,
         no_available_commands: bool = False,
         no_tech_stack: bool = False,
+        no_architecture_decisions: bool = False,
     ) -> GenerationRequest:
-        self.loaded.append((path, output, no_overview, no_available_commands, no_tech_stack))
+        self.loaded.append(
+            (
+                path,
+                output,
+                no_overview,
+                no_available_commands,
+                no_tech_stack,
+                no_architecture_decisions,
+            )
+        )
         return GenerationRequest(output or "AGENTS.md")
 
     def generate(self, request: GenerationRequest) -> None:
@@ -39,7 +51,7 @@ def test_default_invocation_delegates_generation(capsys: pytest.CaptureFixture[s
     status = run([], version="1.2.3", configuration=services, generator=services)
     # Then the default request is generated with silent success.
     assert status == 0
-    assert services.loaded == [(None, None, False, False, False)]
+    assert services.loaded == [(None, None, False, False, False, False)]
     assert services.generated == [GenerationRequest()]
     assert capsys.readouterr() == ("", "")
 
@@ -87,6 +99,7 @@ def test_cli_passes_explicit_overrides() -> None:
             "--no-overview",
             "--no-available-commands",
             "--no-tech-stack",
+            "--no-architecture-decisions",
         ],
         version="1.2.3",
         configuration=services,
@@ -94,7 +107,7 @@ def test_cli_passes_explicit_overrides() -> None:
     )
     # Then all explicit choices reach the configuration port without interpretation.
     assert status == 0
-    assert services.loaded == [("custom.toml", "custom.md", True, True, True)]
+    assert services.loaded == [("custom.toml", "custom.md", True, True, True, True)]
     assert services.generated[0].output == "custom.md"
 
 
