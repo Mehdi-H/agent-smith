@@ -2,7 +2,19 @@
 
 Install [mise](https://mise.jdx.dev/), then run `mise trust` and `mise install`.
 Activate mise in your shell or prefix commands with `mise exec --`.
-Run `just` to discover documented operations.
+From the cloned repository, prepare the development environment and verify the CLI:
+
+```sh
+mise trust
+mise install
+just setup
+just run --help
+just run --version
+```
+
+Run `just help` to discover commands with their descriptions and parameters.
+Running `just` displays the same help. `just build` produces a wheel and source
+distribution in `dist/` using standard Python packaging metadata.
 Recipes are grouped by usage. Run `just --groups` to list groups, or
 `just --list --group Quality` to focus on checks. Every recipe, including private
 helpers, must have a nonempty documentation comment and belong to a nonempty
