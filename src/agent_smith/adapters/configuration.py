@@ -10,6 +10,7 @@ else:
     import tomli as tomllib
 
 from agent_smith.application.ports import (
+    ArchitectureDecisionsSection,
     AvailableCommandsSection,
     CommandSection,
     GenerationError,
@@ -66,6 +67,7 @@ class TomlConfiguration:
         no_overview: bool,
         no_available_commands: bool = False,
         no_tech_stack: bool = False,
+        no_architecture_decisions: bool = False,
     ) -> GenerationRequest:
         source = self.directory / (path or "agent-smith.toml")
         data: dict[str, object] = {}
@@ -77,7 +79,14 @@ class TomlConfiguration:
             raise GenerationError(f"Cannot load configuration {str(source)!r}: {error}") from error
         data = table(
             data,
-            {"output", "overview", "available_commands", "tech_stack", "sections"},
+            {
+                "output",
+                "overview",
+                "available_commands",
+                "tech_stack",
+                "architecture_decisions",
+                "sections",
+            },
             "configuration",
         )
         destination = text(
@@ -94,6 +103,14 @@ class TomlConfiguration:
         sections.extend(
             available_commands_sections(
                 data.get("available_commands", {}), self.directory, no_available_commands
+            )
+        )
+        sections.extend(
+            architecture_decisions_sections(
+                data.get("architecture_decisions", {}),
+                self.directory,
+                destination,
+                no_architecture_decisions,
             )
         )
         sections.extend(custom_sections(data.get("sections", [])))
@@ -148,4 +165,22 @@ def tech_stack_sections(
         raise GenerationError("The output must not overwrite the tech stack source.")
     return [
         TechStackSection(text(settings.get("title", "Main tech stack"), "tech_stack.title"), source)
+    ]
+
+
+def architecture_decisions_sections(
+    value: object, directory: Path, destination: str, disabled: bool
+) -> list[Section]:
+    settings = table(value, {"enabled", "title"}, "architecture_decisions")
+    enabled = settings.get("enabled", (directory / ".adr-dir").is_file())
+    if not isinstance(enabled, bool):
+        raise GenerationError("architecture_decisions.enabled must be a boolean.")
+    if disabled or not enabled:
+        return []
+    if (directory / ".adr-dir").resolve() == (directory / destination).resolve():
+        raise GenerationError("The output must not overwrite .adr-dir.")
+    return [
+        ArchitectureDecisionsSection(
+            text(settings.get("title", "Architecture decisions"), "architecture_decisions.title")
+        )
     ]

@@ -16,7 +16,7 @@ def run(
     parser = argparse.ArgumentParser(
         prog="agent-smith",
         description="Build agent instructions from your project's sources.",
-        epilog="Detects README.md, justfile and mise.toml; customize sections in agent-smith.toml.",
+        epilog="Detects README.md, mise.toml, justfile and .adr-dir; see agent-smith.toml.",
         allow_abbrev=False,
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {version}")
@@ -35,6 +35,11 @@ def run(
     parser.add_argument(
         "--no-tech-stack", action="store_true", help="Disable the built-in mise.toml tech stack."
     )
+    parser.add_argument(
+        "--no-architecture-decisions",
+        action="store_true",
+        help="Disable the built-in adr list section.",
+    )
     invocation = list(sys.argv[1:] if argv is None else argv)
     arguments = parser.parse_args(invocation)
     try:
@@ -44,6 +49,7 @@ def run(
             no_overview=arguments.no_overview,
             no_available_commands=arguments.no_available_commands,
             no_tech_stack=arguments.no_tech_stack,
+            no_architecture_decisions=arguments.no_architecture_decisions,
         )
         generator.generate(replace(request, command=shlex.join(["agent-smith", *invocation])))
     except GenerationError as error:

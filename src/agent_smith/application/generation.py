@@ -5,9 +5,11 @@ from dataclasses import dataclass
 from pathlib import PurePath
 
 from agent_smith.application.ports import (
+    ArchitectureDecisionsSection,
     AvailableCommandsSection,
     CommandRunner,
     CommandSection,
+    DecisionListParser,
     DocumentWriter,
     GenerationError,
     GenerationRequest,
@@ -61,6 +63,7 @@ class GenerationService:
     writer: DocumentWriter
     help_parser: HelpParser
     tech_stack: TechStackParser
+    decisions: DecisionListParser
 
     def generate(self, request: GenerationRequest) -> None:
         """Generate one deterministic document via injected effect boundaries."""
@@ -90,6 +93,9 @@ class GenerationService:
                 return self.tech_stack.render(self.reader.read(section.source)), invocation
             except GenerationError as error:
                 raise GenerationError(f"Tech stack source {section.source!r}: {error}") from error
+        if isinstance(section, ArchitectureDecisionsSection):
+            directory = self.reader.read(".adr-dir")
+            return self.decisions.render(directory, self.commands.run("adr list")), "adr list"
         return self.command_content(section)
 
     def command_content(

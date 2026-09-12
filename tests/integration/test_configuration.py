@@ -192,3 +192,68 @@ def test_output_cannot_overwrite_tech_stack_source(tmp_path: Path) -> None:
         TomlConfiguration(tmp_path).load(None, output="mise.toml", no_overview=True)
     # Then the source remains unchanged.
     assert (tmp_path / "mise.toml").read_text() == '[tools]\nuv="latest"'
+
+
+def test_adr_metadata_enables_architecture_decisions(tmp_path: Path) -> None:
+    # Given a root .adr-dir and a custom trailing section.
+    from agent_smith.application.ports import ArchitectureDecisionsSection
+
+    (tmp_path / ".adr-dir").write_text("docs/adr\n")
+    (tmp_path / "agent-smith.toml").write_text('[[sections]]\ntitle="Extra"\ncommand="echo extra"')
+    # When convention-based configuration is loaded.
+    request = TomlConfiguration(tmp_path).load(None, output=None, no_overview=False)
+    # Then the ADR section follows the overview and precedes custom sections.
+    assert request.sections == (
+        OverviewSection(),
+        ArchitectureDecisionsSection(),
+        CommandSection("Extra", "echo extra"),
+    )
+
+
+@pytest.mark.parametrize("disabled_by", ["cli", "config"])
+def test_architecture_decisions_can_be_disabled(tmp_path: Path, disabled_by: str) -> None:
+    # Given a detected ADR configuration and an explicit enable setting.
+    (tmp_path / ".adr-dir").write_text("missing")
+    (tmp_path / "agent-smith.toml").write_text(
+        "[architecture_decisions]\nenabled=" + ("false" if disabled_by == "config" else "true")
+    )
+    # When a supported override disables the built-in.
+    request = TomlConfiguration(tmp_path).load(
+        None, output=None, no_overview=False, no_architecture_decisions=disabled_by == "cli"
+    )
+    # Then no ADR command is scheduled.
+    assert request.sections == (OverviewSection(),)
+
+
+def test_architecture_decisions_can_be_explicitly_enabled_and_renamed(tmp_path: Path) -> None:
+    # Given an explicit enable setting even though .adr-dir is not yet present.
+    from agent_smith.application.ports import ArchitectureDecisionsSection
+
+    (tmp_path / "agent-smith.toml").write_text(
+        '[architecture_decisions]\nenabled=true\ntitle="Decisions"'
+    )
+    # When the configuration is loaded.
+    request = TomlConfiguration(tmp_path).load(None, output=None, no_overview=True)
+    # Then generation must attempt the renamed built-in rather than silently omitting it.
+    assert request.sections == (ArchitectureDecisionsSection("Decisions"),)
+
+
+@pytest.mark.parametrize("settings", ['enabled="yes"', 'enabled=true\ntitle=""', "unknown=true"])
+def test_invalid_architecture_decisions_settings(tmp_path: Path, settings: str) -> None:
+    # Given malformed extractor configuration.
+    (tmp_path / "agent-smith.toml").write_text("[architecture_decisions]\n" + settings)
+    # When loading these settings.
+    with pytest.raises(GenerationError, match="architecture_decisions"):
+        TomlConfiguration(tmp_path).load(None, output=None, no_overview=False)
+    # Then no generated file exists.
+    assert not (tmp_path / "AGENTS.md").exists()
+
+
+def test_adr_metadata_cannot_be_overwritten(tmp_path: Path) -> None:
+    # Given the source metadata selected as the output path.
+    (tmp_path / ".adr-dir").write_text("docs/adr\n")
+    # When configuration is loaded.
+    with pytest.raises(GenerationError, match="overwrite"):
+        TomlConfiguration(tmp_path).load(None, output=".adr-dir", no_overview=True)
+    # Then the input metadata remains intact.
+    assert (tmp_path / ".adr-dir").read_text() == "docs/adr\n"

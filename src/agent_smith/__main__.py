@@ -3,6 +3,7 @@
 from collections.abc import Sequence
 from importlib.metadata import version
 
+from agent_smith.adapters.adr import AdrListParser
 from agent_smith.adapters.cli import run
 from agent_smith.adapters.configuration import TomlConfiguration
 from agent_smith.adapters.filesystem import AtomicDocumentWriter, FileTextReader
@@ -22,6 +23,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         AtomicDocumentWriter(),
         JustHelpParser(),
         MiseTechStackParser(),
+        AdrListParser(),
     )
     return run(
         argv, version=version("agent-smith"), configuration=TomlConfiguration(), generator=generator
