@@ -87,6 +87,14 @@ The audit runs offline, with strict collection so malformed workflows fail
 instead of being skipped. Successful runs are silent; findings retain their
 rule identifiers and source locations. Online audit rules are not run.
 
+## Shell feedback
+
+`just shellcheck-check` recursively checks `.sh` and `.bash` files under `scripts/`
+with the mise-pinned ShellCheck. It is included in `just check`, pre-commit and CI.
+ShellCheck uses each script's shebang to select its dialect. All default diagnostic
+severities are enabled; no rules are suppressed. Success is silent, and failure
+returns exit 1 with file, line and rule identifiers through the feedback wrapper.
+
 ## Python security feedback
 
 `just bandit-check` scans Python application code and repository scripts with

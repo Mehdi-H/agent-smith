@@ -35,7 +35,8 @@ export AGENT_SMITH_DEMO_SOCKET="$scratch/tmux.sock"
 export AGENT_SMITH_DEMO_SUCCESS="$scratch/success"
 glow_binary=$(mise which glow)
 tmux_binary=$(mise which tmux)
-export PATH="$PWD/.venv/bin:$(dirname "$glow_binary"):$(dirname "$tmux_binary"):$PATH"
+PATH="$PWD/.venv/bin:$(dirname "$glow_binary"):$(dirname "$tmux_binary"):$PATH"
+export PATH
 mise exec -- vhs --output "$scratch/agent-smith.gif" --output "$scratch/agent-smith.mp4" docs/demo/agent-smith.tape
 if [ ! -f "$AGENT_SMITH_DEMO_SUCCESS" ]; then
     printf '%s\n' 'The recorded agent-smith command failed; inspect the recording and fix generation.' >&2
