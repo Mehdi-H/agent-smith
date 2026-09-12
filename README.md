@@ -7,14 +7,16 @@
 Build agent instructions from your project's sources.
 
 Run `agent-smith` at your project root to generate **`AGENTS.md`** from your
-README overview, your documented just commands and optional custom extractors.
+README overview, your documented just commands, your mise tool declarations and
+optional custom extractors.
 The output is deterministic Markdown.
 
+## Demo
+
 > [!NOTE]
-> The CLI is a development preview. Built-in overview and available-command
+> The CLI is a development preview. Built-in overview, available-command and tech-stack
 > sections are available; no package release has been published yet.
 
-## Demo
 
 ![agent-smith creating AGENTS.md on the left, with a live Glow preview on the right](docs/demo/agent-smith.gif)
 
@@ -89,6 +91,41 @@ end of the file. Badges, links and GitHub alerts in the introduction are kept.
 An absent README, a missing H1 or an empty introduction produces an error.
 Use `--no-overview` to disable this section.
 
+### Main tech stack: declared tools in a root mise.toml
+
+Put a `mise.toml` at your project root with a nonempty `[tools]` table:
+
+```toml
+[tools]
+python = ["3.14", "3.10"]
+uv = "latest"
+node = { version = "lts", postinstall = "corepack enable" }
+```
+
+Agent Smith automatically adds:
+
+```markdown
+## Main tech stack
+
+- `python` — `3.14`, `3.10`
+- `uv` — `latest`
+- `node` — `lts`
+```
+
+Tool names (including backend prefixes) and declared versions stay in file order.
+Strings, arrays of versions, and tables with a string `version` are supported,
+including arrays of those tables. Installation options are ignored. Agent Smith
+reads TOML directly: mise need not be installed, no hooks or templates execute,
+and aliases such as `latest` remain literal. It does not resolve installed versions,
+merge global/local configuration, or inspect other files such as `.python-version`.
+
+With no root `mise.toml`, this section is omitted. Use `--no-tech-stack` or
+`[tech_stack].enabled = false` to disable it. In the tool's configuration, `source`
+selects another TOML file and `title` changes the heading. An explicit
+`enabled = true` requires that source to exist. Invalid TOML, an empty `[tools]`
+table or an unsupported version declaration fails generation and preserves the
+existing document. The footer names the exact `agent-smith` invocation.
+
 ### Available commands: a documented, grouped justfile at the project root
 
 Document your project's practices in a root `justfile` (also detected as
@@ -135,7 +172,7 @@ as Markdown through a custom section instead.
 ## Configure sections
 
 An optional root `agent-smith.toml` customizes built-in sections and adds custom
-extractors. For example, to keep both built-ins and append tracked files:
+extractors. For example, to enable the three built-ins and append tracked files:
 
 ```toml
 output = "AGENTS.md"
@@ -150,6 +187,11 @@ enabled = true
 title = "Available commands"
 command = "just help"
 
+[tech_stack]
+enabled = true
+source = "mise.toml"
+title = "Main tech stack"
+
 [[sections]]
 title = "Tracked files"
 command = "git ls-files"
@@ -157,7 +199,7 @@ command = "git ls-files"
 
 Each custom section uses its command's UTF-8 stdout as Markdown, followed by a
 footer with the exact command. Sections appear in configuration order after the
-built-in overview and available commands. Set `[available_commands].enabled = false`
+built-in overview, main tech stack and available commands. Set `[available_commands].enabled = false`
 to disable command discovery, or change its `command` to another source of
 standard just list output, such as `just --list`. Explicit `enabled = true`
 requires the command to work even if no root justfile was detected.

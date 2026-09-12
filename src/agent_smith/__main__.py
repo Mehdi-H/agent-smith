@@ -8,6 +8,7 @@ from agent_smith.adapters.configuration import TomlConfiguration
 from agent_smith.adapters.filesystem import AtomicDocumentWriter, FileTextReader
 from agent_smith.adapters.just_help import JustHelpParser
 from agent_smith.adapters.markdown import MarkdownOverviewParser
+from agent_smith.adapters.mise import MiseTechStackParser
 from agent_smith.adapters.process import ShellCommandRunner
 from agent_smith.application.generation import GenerationService
 
@@ -20,6 +21,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         ShellCommandRunner(),
         AtomicDocumentWriter(),
         JustHelpParser(),
+        MiseTechStackParser(),
     )
     return run(
         argv, version=version("agent-smith"), configuration=TomlConfiguration(), generator=generator

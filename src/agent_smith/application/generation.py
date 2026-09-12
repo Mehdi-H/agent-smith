@@ -7,6 +7,7 @@ from pathlib import PurePath
 from agent_smith.application.ports import (
     AvailableCommandsSection,
     CommandRunner,
+    CommandSection,
     DocumentWriter,
     GenerationError,
     GenerationRequest,
@@ -14,6 +15,8 @@ from agent_smith.application.ports import (
     OverviewParser,
     OverviewSection,
     Section,
+    TechStackParser,
+    TechStackSection,
     TextReader,
 )
 
@@ -57,6 +60,7 @@ class GenerationService:
     commands: CommandRunner
     writer: DocumentWriter
     help_parser: HelpParser
+    tech_stack: TechStackParser
 
     def generate(self, request: GenerationRequest) -> None:
         """Generate one deterministic document via injected effect boundaries."""
@@ -80,13 +84,20 @@ class GenerationService:
 
     def section_content(self, section: Section, invocation: str) -> tuple[str, str]:
         if isinstance(section, OverviewSection):
-            body = self.overview.extract(self.reader.read(section.source))
-            command = invocation
-        else:
-            if not section.command.strip() or any(c in section.command for c in "\r\n"):
-                raise GenerationError("Section commands must be nonempty and on one line.")
-            body = self.commands.run(section.command)
-            if isinstance(section, AvailableCommandsSection):
-                body = self.help_parser.render(body)
-            command = section.command
-        return body, command
+            return self.overview.extract(self.reader.read(section.source)), invocation
+        if isinstance(section, TechStackSection):
+            try:
+                return self.tech_stack.render(self.reader.read(section.source)), invocation
+            except GenerationError as error:
+                raise GenerationError(f"Tech stack source {section.source!r}: {error}") from error
+        return self.command_content(section)
+
+    def command_content(
+        self, section: AvailableCommandsSection | CommandSection
+    ) -> tuple[str, str]:
+        if not section.command.strip() or any(c in section.command for c in "\r\n"):
+            raise GenerationError("Section commands must be nonempty and on one line.")
+        body = self.commands.run(section.command)
+        if isinstance(section, AvailableCommandsSection):
+            body = self.help_parser.render(body)
+        return body, section.command

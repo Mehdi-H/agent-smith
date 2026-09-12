@@ -124,3 +124,71 @@ def test_invalid_available_commands_configuration(tmp_path: Path, value: str) ->
         TomlConfiguration(tmp_path).load(None, output=None, no_overview=False)
     # Then a diagnostic identifies the invalid configuration.
     assert str(error.value)
+
+
+def test_mise_file_enables_tech_stack_before_available_commands(tmp_path: Path) -> None:
+    # Given root mise and just files and a trailing custom section.
+    from agent_smith.application.ports import AvailableCommandsSection, TechStackSection
+
+    (tmp_path / "mise.toml").write_text('[tools]\npython = "3.14"')
+    (tmp_path / "justfile").write_text("help:\n    just --list\n")
+    (tmp_path / "agent-smith.toml").write_text('[[sections]]\ntitle="Extra"\ncommand="echo extra"')
+    # When defaults are detected from the filesystem.
+    request = TomlConfiguration(tmp_path).load(None, output=None, no_overview=False)
+    # Then the tech stack follows overview and precedes available commands and custom sections.
+    assert request.sections == (
+        OverviewSection(),
+        TechStackSection(),
+        AvailableCommandsSection(),
+        CommandSection("Extra", "echo extra"),
+    )
+
+
+@pytest.mark.parametrize("disabled_by", ["cli", "config"])
+def test_tech_stack_can_be_disabled(tmp_path: Path, disabled_by: str) -> None:
+    # Given a mise file and an explicit setting overridable from the CLI.
+    (tmp_path / "mise.toml").write_text("[broken")
+    (tmp_path / "agent-smith.toml").write_text(
+        "[tech_stack]\nenabled = " + ("false" if disabled_by == "config" else "true")
+    )
+    # When the built-in is disabled.
+    request = TomlConfiguration(tmp_path).load(
+        None, output=None, no_overview=False, no_tech_stack=disabled_by == "cli"
+    )
+    # Then it is omitted without reading the malformed source.
+    assert request.sections == (OverviewSection(),)
+
+
+def test_tech_stack_custom_source_and_title(tmp_path: Path) -> None:
+    # Given a custom source filename and section title.
+    from agent_smith.application.ports import TechStackSection
+
+    (tmp_path / "tools.toml").write_text('[tools]\nuv = "latest"')
+    (tmp_path / "agent-smith.toml").write_text('[tech_stack]\nsource="tools.toml"\ntitle="Stack"')
+    # When the selected file is detected.
+    request = TomlConfiguration(tmp_path).load(None, output=None, no_overview=True)
+    # Then the custom source and title reach the generation service.
+    assert request.sections == (TechStackSection("Stack", "tools.toml"),)
+
+
+@pytest.mark.parametrize(
+    "settings", ['enabled="yes"', 'source=""', 'enabled=true\ntitle=""', "unknown=1"]
+)
+def test_invalid_tech_stack_configuration(tmp_path: Path, settings: str) -> None:
+    # Given invalid extractor settings.
+    (tmp_path / "agent-smith.toml").write_text("[tech_stack]\n" + settings)
+    # When loading configuration.
+    with pytest.raises(GenerationError, match="tech_stack"):
+        TomlConfiguration(tmp_path).load(None, output=None, no_overview=False)
+    # Then no generated file exists.
+    assert not (tmp_path / "AGENTS.md").exists()
+
+
+def test_output_cannot_overwrite_tech_stack_source(tmp_path: Path) -> None:
+    # Given a mise file selected as both input and output.
+    (tmp_path / "mise.toml").write_text('[tools]\nuv="latest"')
+    # When loading this unsafe output choice.
+    with pytest.raises(GenerationError, match="overwrite the tech stack source"):
+        TomlConfiguration(tmp_path).load(None, output="mise.toml", no_overview=True)
+    # Then the source remains unchanged.
+    assert (tmp_path / "mise.toml").read_text() == '[tools]\nuv="latest"'

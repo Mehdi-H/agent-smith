@@ -1,6 +1,6 @@
 [project]
 name = "agent-smith"
-version = "0.1.0"
+version = "0.2.0"
 description = "Build agent instructions from your project's sources."
 readme = "README.md"
 requires-python = ">=3.10"

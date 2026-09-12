@@ -131,3 +131,44 @@ def test_invalid_help_preserves_existing_document(tmp_path: Path) -> None:
     assert result.returncode == 1
     assert "just --list" in result.stderr
     assert output.read_text() == "Previous instructions\n"
+
+
+def test_mise_tech_stack_generation_is_repeatable(tmp_path: Path) -> None:
+    # Given declared versions, an install hook and environment data in a root mise file.
+    (tmp_path / "README.md").write_text("# Demo\n\nOverview.\n")
+    (tmp_path / "mise.toml").write_text(
+        '[tools]\npython=["3.14", "3.10"]\n'
+        'uv={version="latest", postinstall="touch should-not-exist"}\n'
+        '[env]\nPRIVATE_VALUE="not-in-output"\n'
+    )
+    # When the installed CLI generates twice without invoking mise.
+    first = invoke(tmp_path)
+    output = tmp_path / "AGENTS.md"
+    content = output.read_bytes()
+    second = invoke(tmp_path)
+    # Then the result is deterministic and contains only declared tool data.
+    assert first.returncode == second.returncode == 0, first.stderr + second.stderr
+    assert content == output.read_bytes()
+    assert (
+        "## Main tech stack\n\n- `python` — `3.14`, `3.10`\n- `uv` — `latest`" in content.decode()
+    )
+    assert b"not-in-output" not in content
+    assert not (tmp_path / "should-not-exist").exists()
+
+
+def test_malformed_mise_fails_safely_and_can_be_disabled(tmp_path: Path) -> None:
+    # Given a malformed mise file and a previous generated document.
+    (tmp_path / "README.md").write_text("# Demo\n\nOverview.\n")
+    (tmp_path / "mise.toml").write_text("[broken")
+    output = tmp_path / "AGENTS.md"
+    output.write_text("Previous instructions\n")
+    # When default generation encounters the invalid input.
+    failed = invoke(tmp_path)
+    previous = output.read_text()
+    disabled = invoke(tmp_path, "--no-tech-stack")
+    # Then failure preserves the file and disabling the extractor restores generation.
+    assert failed.returncode == 1
+    assert "mise.toml" in failed.stderr
+    assert previous == "Previous instructions\n"
+    assert disabled.returncode == 0, disabled.stderr
+    assert "## Main tech stack" not in output.read_text()

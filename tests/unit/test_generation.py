@@ -53,7 +53,7 @@ def test_generation_renders_order_and_exact_provenance() -> None:
         command="agent-smith --config project.toml --output notes.md",
     )
     # When the application generates the document.
-    GenerationService(ports, ports, ports, ports, ports).generate(request)
+    GenerationService(ports, ports, ports, ports, ports, ports).generate(request)
     # Then the deterministic document preserves section order and command spelling.
     assert ports.commands == ["./tools.sh --all"]
     assert ports.files["notes.md"] == (
@@ -73,7 +73,7 @@ def test_failure_preserves_existing_document() -> None:
     request = GenerationRequest(sections=(OverviewSection(), CommandSection("Tools", "failing")))
     # When one section cannot be generated.
     with pytest.raises(GenerationError):
-        GenerationService(ports, ports, ports, ports, ports).generate(request)
+        GenerationService(ports, ports, ports, ports, ports, ports).generate(request)
     # Then no partial output is written.
     assert ports.files["AGENTS.md"] == "Existing document"
 
@@ -95,7 +95,7 @@ def test_invalid_requests_do_not_write(generation_request: GenerationRequest) ->
     ports = Ports()
     # When the request is validated.
     with pytest.raises(GenerationError):
-        GenerationService(ports, ports, ports, ports, ports).generate(generation_request)
+        GenerationService(ports, ports, ports, ports, ports, ports).generate(generation_request)
     # Then the output is not created.
     assert "AGENTS.md" not in ports.files
 
@@ -146,7 +146,7 @@ def test_available_commands_uses_injected_parser_and_exact_provenance() -> None:
     ports = Ports()
     request = GenerationRequest(sections=(AvailableCommandsSection(command="just --list"),))
     # When the section is rendered through the help parser.
-    GenerationService(ports, ports, ports, ports, ports).generate(request)
+    GenerationService(ports, ports, ports, ports, ports, ports).generate(request)
     # Then interpreted Markdown and the executed command appear in the generated document.
     assert ports.commands == ["just --list"]
     assert (
@@ -154,3 +154,37 @@ def test_available_commands_uses_injected_parser_and_exact_provenance() -> None:
         in ports.files["AGENTS.md"]
     )
     assert "**`just --list`**" in ports.files["AGENTS.md"]
+
+
+def test_tech_stack_reads_source_without_executing_a_command() -> None:
+    # Given the real pure parser and an in-memory filesystem boundary.
+    from agent_smith.adapters.mise import MiseTechStackParser
+    from agent_smith.application.ports import TechStackSection
+
+    ports = Ports(files={"tools.toml": '[tools]\npython = "3.14"'})
+    request = GenerationRequest(
+        sections=(TechStackSection("Stack", "tools.toml"),),
+        command="agent-smith --config custom.toml",
+    )
+    # When generation interprets the source through its injected parser.
+    GenerationService(ports, ports, ports, ports, ports, MiseTechStackParser()).generate(request)
+    # Then the section lists declared tools and the actual invocation, with no subprocess.
+    assert "## Stack\n\n- `python` — `3.14`" in ports.files["AGENTS.md"]
+    assert "**`agent-smith --config custom.toml`**" in ports.files["AGENTS.md"]
+    assert ports.commands == []
+
+
+def test_invalid_tech_stack_preserves_output_and_identifies_source() -> None:
+    # Given an invalid mise file and an existing document behind injected boundaries.
+    from agent_smith.adapters.mise import MiseTechStackParser
+    from agent_smith.application.ports import TechStackSection
+
+    ports = Ports(files={"tools.toml": "[broken", "AGENTS.md": "Previous document"})
+    request = GenerationRequest(sections=(TechStackSection(source="tools.toml"),))
+    # When generation fails to parse the selected source.
+    with pytest.raises(GenerationError, match=r"tools\.toml"):
+        GenerationService(ports, ports, ports, ports, ports, MiseTechStackParser()).generate(
+            request
+        )
+    # Then the original output is preserved.
+    assert ports.files["AGENTS.md"] == "Previous document"
