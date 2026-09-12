@@ -6,18 +6,22 @@
 [![PyPI](https://img.shields.io/pypi/v/agent-smith-cli)](https://pypi.org/project/agent-smith-cli/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
+<img align="right" width="360" src="docs/images/agent-smith-overview.png" alt="Project sources assembled into an AGENTS.md file wearing Agent Smith’s sunglasses." />
+
 *Smith* your AGENTS.md file 🕶️
 
 Build agent instructions from your project's sources !
 
 Treat your agent instructions as **living documentation**: regenerate them from
-the sources you maintain as your project evolves.
+the sources you maintain as your project evolves
 
 Run `agent-smith` at your project root to generate **`AGENTS.md`** from your
 README overview, your mise tool declarations, documented just commands,
 architecture decision filenames and optional custom extractors
 
 Forget `/init` skill, the output is _deterministic_, repeatable Markdown, you stay in control
+
+<br clear="both" />
 
 ## Demo
 
