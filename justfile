@@ -45,7 +45,7 @@ build:
 
 # Check lint, formatting, types, dependencies and fast tests without network or sync.
 [group("Quality")]
-check: lint types dependencies complexity-check test-structure manifest-check skills-check workflows-check
+check: lint types dependencies complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check
     sh scripts/feedback.sh "Unit tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q tests/unit
 
 # Check Python lint rules and Python/justfile formatting without changing files.
@@ -104,6 +104,11 @@ test-integration:
 [group("Tests")]
 test-functional:
     uv run --offline --no-sync pytest tests/functional || exit 1
+
+# Reject patching in tests; use real collaborators or explicitly injected doubles.
+[group("Quality")]
+test-doubles-check:
+    sh scripts/feedback.sh "Test doubles" "Remove patching; inject collaborators or exercise real behavior in sociable tests." uv run --offline --no-sync python scripts/check_test_doubles.py
 
 # Verify Given/When/Then comments in Python tests (optional test files or directories).
 [group("Tests")]

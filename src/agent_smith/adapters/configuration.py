@@ -34,7 +34,7 @@ def text(value: object, name: str) -> str:
 
 
 def overview_sections(
-    value: object, destination: str, no_overview: bool
+    value: object, destination: str, no_overview: bool, directory: Path
 ) -> list[OverviewSection | CommandSection]:
     overview = table(value, {"enabled", "source", "title"}, "overview")
     enabled = overview.get("enabled", True)
@@ -43,7 +43,7 @@ def overview_sections(
     sections: list[OverviewSection | CommandSection] = []
     if enabled and not no_overview:
         readme = text(overview.get("source", "README.md"), "overview.source")
-        if Path(readme).resolve() == Path(destination).resolve():
+        if (directory / readme).resolve() == (directory / destination).resolve():
             raise GenerationError("The output must not overwrite the overview source.")
         sections.append(
             OverviewSection(text(overview.get("title", "Overview"), "overview.title"), readme)
@@ -52,8 +52,11 @@ def overview_sections(
 
 
 class TomlConfiguration:
+    def __init__(self, directory: Path | None = None) -> None:
+        self.directory = directory if directory is not None else Path.cwd()
+
     def load(self, path: str | None, *, output: str | None, no_overview: bool) -> GenerationRequest:
-        source = Path(path or "agent-smith.toml")
+        source = self.directory / (path or "agent-smith.toml")
         data: dict[str, object] = {}
         try:
             if path is not None or source.exists():
@@ -65,7 +68,9 @@ class TomlConfiguration:
         destination = text(
             output if output is not None else data.get("output", "AGENTS.md"), "output"
         )
-        sections = overview_sections(data.get("overview", {}), destination, no_overview)
+        sections = overview_sections(
+            data.get("overview", {}), destination, no_overview, self.directory
+        )
         custom = data.get("sections", [])
         if not isinstance(custom, list):
             raise GenerationError("sections must be an array of TOML tables.")

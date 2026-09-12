@@ -1,0 +1,4 @@
+from unittest.mock import Mock
+service = Service(repository=Mock())
+result = service.run()
+assert result is not None

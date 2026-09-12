@@ -1,0 +1,5 @@
+from unittest.mock import patch as replace
+mock.patch.object(Service, "run")
+monkeypatch.setattr(Service, "run", fake)
+pytest.MonkeyPatch()
+mocker.patch("service.run")
