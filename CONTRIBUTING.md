@@ -45,7 +45,9 @@ After `just setup`, run `just demo` from the repository root. It uses VHS to
 record the actual `agent-smith` command, waits for completion, checks its exit
 status and shows two tmux panes side by side. On the left, `rm -f AGENTS.md`
 starts from no generated file, then `agent-smith` creates it. On the right,
-`watch` refreshes the Glow rendering every half second. If recording fails,
+`watch` refreshes the Glow rendering every half second, then the demo switches
+to `less -R` to scroll the same rendering down to the architecture decisions.
+If recording fails,
 the previous AGENTS.md is restored (or removed if it did not exist). It writes
 `docs/demo/agent-smith.mp4` and
 `docs/demo/agent-smith.gif`; only the GIF is versioned and embedded in the README.
@@ -53,9 +55,9 @@ The MP4 is a local export ignored by Git. This also
 regenerates AGENTS.md, so review that diff with the recording.
 
 VHS, Glow and tmux are pinned in mise.toml. Recording also requires FFmpeg,
-ttyd and procps `watch` on PATH. On macOS, install them with
+ttyd, `less` and procps `watch` on PATH. On macOS, `less` is included; install the others with
 `brew install ffmpeg ttyd watch`; on Debian/Ubuntu, use your package manager's
-`ffmpeg`, `ttyd` and `procps` packages. The recorder uses a private tmux server
+`ffmpeg`, `ttyd`, `less` and `procps` packages. The recorder uses a private tmux server
 and closes it on exit, leaving existing terminal sessions alone. VHS may download a browser
 on its first run. These media tools are not needed to use Agent Smith.
 

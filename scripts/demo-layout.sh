@@ -9,5 +9,7 @@ tmux -S "$AGENT_SMITH_DEMO_SOCKET" select-pane -t demo:0.0 -T 'Run agent-smith'
 tmux -S "$AGENT_SMITH_DEMO_SOCKET" send-keys -t demo:0.0 'rm -f AGENTS.md' Enter
 tmux -S "$AGENT_SMITH_DEMO_SOCKET" split-window -h -l '68%' -t demo:0.0 'TERM=xterm-256color watch --color --no-title --interval 0.5 sh scripts/demo-preview.sh'
 tmux -S "$AGENT_SMITH_DEMO_SOCKET" select-pane -t demo:0.1 -T 'AGENTS.md | watch glow (0.5s)'
+# Keep the live preview initially, then let the tape page through the full render.
+tmux -S "$AGENT_SMITH_DEMO_SOCKET" bind-key g "respawn-pane -k -t demo:0.1 'sh scripts/demo-preview.sh | less -R'; select-pane -t demo:0.1; select-pane -t demo:0.1 -T 'AGENTS.md | glow (scroll)'"
 tmux -S "$AGENT_SMITH_DEMO_SOCKET" select-pane -t demo:0.0
 tmux -S "$AGENT_SMITH_DEMO_SOCKET" attach-session -t demo

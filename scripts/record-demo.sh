@@ -1,7 +1,7 @@
 #!/bin/sh
 # Record the real installed CLI in this checkout and verify generation succeeded.
 set -eu
-for program in vhs ffmpeg ttyd watch; do
+for program in vhs ffmpeg less ttyd watch; do
     if ! command -v "$program" >/dev/null 2>&1; then
         printf 'Missing %s; see the terminal demo setup in CONTRIBUTING.md.\n' "$program" >&2
         exit 1
