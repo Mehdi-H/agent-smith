@@ -12,8 +12,11 @@ just run --help
 just run --version
 ```
 
-Run `just help` to discover commands with their descriptions and parameters.
-Running `just` displays the same help. `just build` produces a wheel and source
+> [!TIP]
+> Run `just help` to discover commands with their descriptions and parameters.
+> Running `just` displays the same help.
+
+`just build` produces a wheel and source
 distribution in `dist/` using standard Python packaging metadata.
 Recipes are grouped by usage. Run `just --groups` to list groups, or
 `just --list --group Quality` to focus on checks. Every recipe, including private
@@ -58,9 +61,16 @@ through uv, offline and without synchronizing dependencies. It currently checks
 startup and a successful exit; document generation is not implemented yet.
 
 Run `just hooks-check` to execute the hook manually. Lefthook displays a progress
-summary while successful checks stay quiet. Hooks use mise to resolve the pinned
-tools; mise must be on the PATH of the terminal or IDE that runs Git. Checks
-inspect the working tree, so review partially staged changes before committing.
+summary while successful checks stay quiet.
+
+> [!IMPORTANT]
+> Hooks use mise to resolve the pinned tools. Ensure mise is on the PATH of the
+> terminal or IDE that runs Git.
+
+> [!WARNING]
+> Hooks inspect the working tree, including changes that are not staged. Review
+> partially staged changes before committing: a passing check does not validate
+> the staged snapshot in isolation.
 
 ## Feedback commands
 
@@ -77,9 +87,9 @@ Do not hide setup failures, missing tools or failed checks with `|| true`. Just
 recipes suppress command echo; just may add its own diagnostic on failure.
 This harness currently requires a POSIX shell. The installed CLI does not.
 
-`just test` is an interactive operation: it displays pytest's native output even
-on success, while still returning 1 on any failure. `just check` remains the
-silent-on-success feedback loop for agents.
+> [!NOTE]
+> `just test` displays pytest's native output even on success, while still
+> returning 1 on any failure. `just check` is silent on success for agents.
 
 Commands that generate section content have a different contract: their stdout
 is the content. Do not wrap those producers in the silent feedback wrapper.
