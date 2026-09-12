@@ -1,0 +1,97 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bootstrap:
+        description: Create a patch release even without feature/fix commits
+        type: boolean
+        default: false
+      retry_tag:
+        description: Retry publishing an existing release tag (e.g. v0.3.1)
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    if: github.ref == 'refs/heads/main'
+    uses: $/.github/workflows/ci.yml
+
+  release:
+    needs: checks
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      released: ${{ steps.version.outputs.released }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
+      - name: Install locked release tools
+        run: uv sync --locked --group release
+      - name: Select the checked main revision
+        run: git switch -C main "$GITHUB_SHA"
+      - name: Create release or recover its existing distributions
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_BOOTSTRAP: ${{ inputs.bootstrap || false }}
+          RELEASE_RETRY_TAG: ${{ inputs.retry_tag }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if [ -n "$RELEASE_RETRY_TAG" ]; then
+            just release-recover "$RELEASE_RETRY_TAG"
+          else
+            just release
+          fi
+      - name: Preserve distributions for the PyPI job and troubleshooting
+        if: steps.version.outputs.released == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-distributions
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error
+          retention-days: 30
+      - name: Attach distributions to GitHub release
+        if: steps.version.outputs.released == 'true' && !inputs.retry_tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: just publish-github
+
+  publish:
+    needs: release
+    if: github.ref == 'refs/heads/main' && needs.release.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-distributions
+          path: dist
+      - name: Publish the same distributions to PyPI
+        run: just publish-pypi

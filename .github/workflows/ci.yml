@@ -2,8 +2,7 @@ name: CI
 
 on:
   pull_request:
-  push:
-    branches: [main]
+  workflow_call:
 
 permissions:
   contents: read
@@ -34,7 +33,7 @@ jobs:
       - name: Install Python and locked dependencies
         run: |
           uv python install "$UV_PYTHON"
-          uv sync --locked
+          uv sync --locked --group release
           uv run --offline --no-sync python --version
       - name: Check repository
         run: just check
