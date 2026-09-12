@@ -27,7 +27,7 @@ from agent_smith.application.ports import GenerationError
         ("Before\n\n## Earlier\n\n# Project\nIntro\n## Usage", "Intro"),
         (
             "# Project\n\n[![CI](badge.svg)](url)\n\n> [!NOTE]\n> Hello\n\n## Usage",
-            "[![CI](badge.svg)](url)\n\n> [!NOTE]\n> Hello",
+            "> [!NOTE]\n> Hello",
         ),
     ],
 )
@@ -61,3 +61,52 @@ def test_invalid_overviews_report_a_domain_error(source: str) -> None:
         parser.extract(source)
     # Then the error describes the README convention.
     assert "README" in str(failure.value)
+
+
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        ("![logo](logo.png)\n\nIntro", "Intro"),
+        ('Before ![a](image(a).png "title") after', "Before  after"),
+        ("[![CI](badge.svg)](https://ci)\n\nIntro", "Intro"),
+        ('<IMG src="logo.png" alt="Logo > text" />\n\nIntro', "Intro"),
+        ('<img\n src="logo.png"\n>\n\nIntro', "Intro"),
+        ('<a href="https://ci"><img src="badge.svg"></a>\n\nIntro', "Intro"),
+        ("[![icon](icon.png) Documentation](docs.md)", "[ Documentation](docs.md)"),
+        ("![Logo][image]\n\nIntro\n\n[image]: logo.png", "Intro"),
+        (
+            "![Logo][image]\n\n[Download][image]\n\n[image]: logo.png",
+            "[Download][image]\n\n[image]: logo.png",
+        ),
+        ("[![CI][badge]][ci]\n\nIntro\n\n[badge]: badge.svg\n[ci]: https://ci", "Intro"),
+        (
+            '`![example](image.png)` and `<img src="example">`',
+            '`![example](image.png)` and `<img src="example">`',
+        ),
+        (
+            '```md\n![example](image.png)\n<img src="example">\n```',
+            '```md\n![example](image.png)\n<img src="example">\n```',
+        ),
+        ("    ![example](image.png)\n\nIntro", "    ![example](image.png)\n\nIntro"),
+        ("\\![literal](image.png)\n\nIntro", "\\![literal](image.png)\n\nIntro"),
+        ('<!-- <img src="hidden"> -->\n\nIntro', '<!-- <img src="hidden"> -->\n\nIntro'),
+        ("**Intro** with [documentation](docs.md).", "**Intro** with [documentation](docs.md)."),
+    ],
+)
+def test_overview_removes_rendered_images_and_preserves_text(body: str, expected: str) -> None:
+    # Given prose mixed with rendered images or literal code examples.
+    parser = MarkdownOverviewParser()
+    # When the overview is projected into agent instructions.
+    result = parser.extract(f"# Project\n\n{body}\n\n## Usage")
+    # Then visual-only content disappears without reformatting the remaining prose.
+    assert result == expected
+
+
+def test_image_only_overview_is_empty_after_sanitization() -> None:
+    # Given an overview containing only a linked badge.
+    parser = MarkdownOverviewParser()
+    # When its visual-only content is removed.
+    with pytest.raises(GenerationError) as failure:
+        parser.extract("# Project\n\n[![CI](badge.svg)](https://ci)\n\n## Usage")
+    # Then the existing empty-overview convention remains enforced.
+    assert "empty" in str(failure.value)

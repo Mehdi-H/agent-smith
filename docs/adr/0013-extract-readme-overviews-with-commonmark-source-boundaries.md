@@ -4,7 +4,7 @@ Date: 2026-09-12
 
 ## Status
 
-Accepted
+Superceded by [30. Exclude images and badges from generated README overviews](0030-exclude-images-and-badges-from-generated-readme-overviews.md)
 
 ## Context
 

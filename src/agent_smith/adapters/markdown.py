@@ -2,6 +2,7 @@
 
 from markdown_it import MarkdownIt
 
+from agent_smith.adapters.overview_images import without_images
 from agent_smith.application.generation import content_lines
 from agent_smith.application.ports import GenerationError
 
@@ -10,13 +11,15 @@ class MarkdownOverviewParser:
     def extract(self, markdown: str) -> str:
         """Extract after the first top-level H1 and before the following H2."""
         markdown = markdown.removeprefix("\ufeff").replace("\r\n", "\n").replace("\r", "\n")
+        environment = {}
         headings = [
             (token.tag, token.map)
-            for token in MarkdownIt("commonmark").parse(markdown)
+            for token in MarkdownIt("commonmark").parse(markdown, environment)
             if token.type == "heading_open" and token.level == 0 and token.map is not None
         ]
         start, end = overview_bounds(headings, len(markdown.split("\n")))
         body = content_lines("\n".join(markdown.split("\n")[start:end]))
+        body = content_lines(without_images(body, environment))
         if not body:
             raise GenerationError("README overview is empty between its H1 and first H2.")
         return body

@@ -217,3 +217,22 @@ def test_failing_adr_list_preserves_output_and_can_be_disabled(tmp_path: Path) -
     assert previous == "Previous instructions"
     assert disabled.returncode == 0, disabled.stderr
     assert "Architecture decisions" not in output.read_text()
+
+
+def test_generated_overview_omits_readme_images(tmp_path: Path) -> None:
+    # Given a README whose badges and illustration surround useful instructions.
+    readme = tmp_path / "README.md"
+    source = (
+        "# Project\n\n[![CI](badge.svg)](https://ci)\n\n"
+        '<img src="illustration.png" width="360">\n\n'
+        "Build **instructions**. Read [the guide](docs/guide.md).\n\n## Install\n"
+    )
+    readme.write_text(source)
+    # When the installed CLI projects the overview into AGENTS.md.
+    result = invoke(tmp_path)
+    # Then only useful Markdown is projected and the README remains untouched.
+    assert result.returncode == 0
+    content = (tmp_path / "AGENTS.md").read_text()
+    assert "Build **instructions**. Read [the guide](docs/guide.md)." in content
+    assert "badge.svg" not in content and "illustration.png" not in content
+    assert readme.read_text() == source

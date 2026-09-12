@@ -106,6 +106,8 @@ This section is outside the extracted overview.
 The first H2 ends the overview; if there is no H2, extraction continues to the
 end of the file. Badges, links and GitHub alerts in the introduction are kept.
 An absent README, a missing H1 or an empty introduction produces an error.
+Images, badges and HTML `<img>` tags are omitted from the generated overview;
+text, useful links and code examples are preserved. The README stays unchanged.
 Use `--no-overview` to disable this section.
 
 ### Main tech stack: declared tools in a root mise.toml
