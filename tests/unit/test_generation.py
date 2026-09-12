@@ -37,6 +37,9 @@ class Ports:
             raise GenerationError("command failed")
         return "Custom.\r\n"
 
+    def render(self, output: str) -> str:
+        return "- `just check` — Check the repository."
+
     def write(self, path: str, content: str) -> None:
         self.files[path] = content
 
@@ -50,7 +53,7 @@ def test_generation_renders_order_and_exact_provenance() -> None:
         command="agent-smith --config project.toml --output notes.md",
     )
     # When the application generates the document.
-    GenerationService(ports, ports, ports, ports).generate(request)
+    GenerationService(ports, ports, ports, ports, ports).generate(request)
     # Then the deterministic document preserves section order and command spelling.
     assert ports.commands == ["./tools.sh --all"]
     assert ports.files["notes.md"] == (
@@ -70,7 +73,7 @@ def test_failure_preserves_existing_document() -> None:
     request = GenerationRequest(sections=(OverviewSection(), CommandSection("Tools", "failing")))
     # When one section cannot be generated.
     with pytest.raises(GenerationError):
-        GenerationService(ports, ports, ports, ports).generate(request)
+        GenerationService(ports, ports, ports, ports, ports).generate(request)
     # Then no partial output is written.
     assert ports.files["AGENTS.md"] == "Existing document"
 
@@ -92,7 +95,7 @@ def test_invalid_requests_do_not_write(generation_request: GenerationRequest) ->
     ports = Ports()
     # When the request is validated.
     with pytest.raises(GenerationError):
-        GenerationService(ports, ports, ports, ports).generate(generation_request)
+        GenerationService(ports, ports, ports, ports, ports).generate(generation_request)
     # Then the output is not created.
     assert "AGENTS.md" not in ports.files
 
@@ -134,3 +137,20 @@ def test_heading_escapes_markdown_syntax() -> None:
     result = heading(title)
     # Then Markdown syntax is escaped while ordinary text is retained.
     assert result == "\\[Overview\\](url) \\*bold\\*"
+
+
+def test_available_commands_uses_injected_parser_and_exact_provenance() -> None:
+    # Given a help command and explicitly injected ports.
+    from agent_smith.application.ports import AvailableCommandsSection
+
+    ports = Ports()
+    request = GenerationRequest(sections=(AvailableCommandsSection(command="just --list"),))
+    # When the section is rendered through the help parser.
+    GenerationService(ports, ports, ports, ports, ports).generate(request)
+    # Then interpreted Markdown and the executed command appear in the generated document.
+    assert ports.commands == ["just --list"]
+    assert (
+        "## Available commands\n\n- `just check` — Check the repository."
+        in ports.files["AGENTS.md"]
+    )
+    assert "**`just --list`**" in ports.files["AGENTS.md"]
