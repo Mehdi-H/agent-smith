@@ -49,9 +49,9 @@ build:
     rm -f dist/*.whl dist/*.tar.gz
     uv build --no-sources
 
-# Check lint, formatting, types, dependencies and fast tests without network or sync.
+# Check lint, formatting, types, dependencies, secrets and fast tests without network or sync.
 [group("Quality")]
-check: lint types dependencies bandit-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check
+check: lint types dependencies bandit-check secrets-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check
     sh scripts/feedback.sh "Unit tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q tests/unit
 
 # Check Python lint rules and Python/justfile formatting without changing files.
@@ -145,6 +145,12 @@ tests-pyramid:
 [group("Quality")]
 bandit-check:
     sh scripts/feedback.sh "Bandit" "Fix the reported security issue; keep exceptions narrow and justified." uv run --offline --no-sync bandit -r src scripts --severity-level medium
+
+# Scan committed history and staged changes for secrets with redacted diagnostics.
+[group("Quality")]
+secrets-check:
+    sh scripts/feedback.sh "Committed secrets" "Remove and rotate the reported secret, then rewrite affected Git history before sharing it." betterleaks git . --verbose --no-banner --redact --platform github --exit-code 1
+    sh scripts/feedback.sh "Staged secrets" "Remove the reported secret from the staged changes and rotate it if it was exposed elsewhere." betterleaks git . --pre-commit --staged --verbose --no-banner --redact --platform github --exit-code 1
 
 # Audit locked Python dependencies for known vulnerabilities (network required).
 [group("Quality")]
