@@ -80,6 +80,7 @@ Forget `/init` skill, the output is _deterministic_, repeatable Markdown, you st
 - `just audit-check` — Audit locked Python dependencies for known vulnerabilities (network required).
 - `just bandit-check` — Audit Python source and tooling for medium/high severity security findings.
 - `just check` — Check lint, formatting, types, dependencies, secrets and fast tests without network or sync.
+- `just check-repo-wide` — Run every repository-wide quality, maintenance, test, package and release check (network required).
 - `just cli-check` — Verify CLI startup through help without generating a file during pre-commit.
 - `just complexity-check` — Limit changed Python functions to cognitive complexity 8 against the branch baseline.
 - `just dependencies` — Detect missing, unused or incorrectly classified runtime dependencies.
