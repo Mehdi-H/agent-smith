@@ -1,27 +1,36 @@
 # Agent Smith 🕶️
 
-[![CI](https://github.com/Mehdi-H/agent-smith/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/Mehdi-H/agent-smith/actions/workflows/release.yml?query=branch%3Amain)
-[![Python 3.11–3.14](https://img.shields.io/badge/python-3.11%E2%80%933.14-blue?logo=python&logoColor=white)](pyproject.toml)
-[![Codecov](https://codecov.io/github/Mehdi-H/agent-smith/branch/main/graph/badge.svg?token=9RYPPL8VLH)](https://codecov.io/github/Mehdi-H/agent-smith)
-[![PyPI](https://img.shields.io/pypi/v/agent-smith-cli)](https://pypi.org/project/agent-smith-cli/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+<p align="center"><img width="760" src="docs/images/agent-smith-overview.png" alt="Project sources assembled into an AGENTS.md file wearing Agent Smith’s sunglasses." /></p>
 
-<img align="right" width="360" src="docs/images/agent-smith-overview.png" alt="Project sources assembled into an AGENTS.md file wearing Agent Smith’s sunglasses." />
+<p align="center">
+  <em>Smith your AGENTS.md file.</em><br />
+  Build living agent instructions from the project sources you already maintain.
+</p>
 
-*Smith* your AGENTS.md file 🕶️
+<p align="center"><a href="https://github.com/Mehdi-H/agent-smith/actions/workflows/release.yml?query=branch%3Amain"><img alt="CI" src="https://github.com/Mehdi-H/agent-smith/actions/workflows/release.yml/badge.svg?branch=main" /></a> <a href="pyproject.toml"><img alt="Python 3.11–3.14" src="https://img.shields.io/badge/python-3.11%E2%80%933.14-blue?logo=python&amp;logoColor=white" /></a> <a href="https://codecov.io/github/Mehdi-H/agent-smith"><img alt="Codecov" src="https://codecov.io/github/Mehdi-H/agent-smith/branch/main/graph/badge.svg?token=9RYPPL8VLH" /></a> <a href="https://pypi.org/project/agent-smith-cli/"><img alt="PyPI" src="https://img.shields.io/pypi/v/agent-smith-cli" /></a> <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a></p>
 
-Build agent instructions from your project's sources !
+<p align="center"><code>uv tool install agent-smith-cli</code></p>
 
-Treat your agent instructions as **living documentation**: regenerate them from
-the sources you maintain as your project evolves
+## The problem
 
-Run `agent-smith` at your project root to generate **`AGENTS.md`** from your
-README overview, your mise tool declarations, documented just commands,
-architecture decision filenames and optional custom extractors
+Agent instructions drift when they are maintained separately from the project.
+Commands change, tools move on and architecture decisions accumulate, while a
+hand-written `AGENTS.md` quietly becomes incomplete or misleading. One-off
+generation only postpones the same problem.
 
-Forget `/init` skill, the output is _deterministic_, repeatable Markdown, you stay in control
+Agent instructions should evolve with the sources that already describe the
+project, without surrendering control of the result.
 
-<br clear="both" />
+## How Agent Smith solves it
+
+Run `agent-smith` at your project root. It rebuilds `AGENTS.md` from your README
+overview, your mise tool declarations, documented just commands, architecture
+decision filenames and optional custom extractors.
+
+The result is deterministic, repeatable Markdown: update the sources you own,
+regenerate the instructions and review an ordinary diff. No nondeterministic
+`/init` step to rerun, no tokens spent on a task a deterministic tool can handle,
+and no second document to keep in sync.
 
 ## Demo
 
@@ -39,7 +48,7 @@ Forget `/init` skill, the output is _deterministic_, repeatable Markdown, you st
 ## Install
 
 The PyPI distribution is named **`agent-smith-cli`**; the executable remains
-`agent-smith`. The name `agent-smith` was already taken on PyPI.
+`agent-smith`.
 
 Agent Smith supports Python 3.11–3.14. Install the published CLI from PyPI with uv:
 
@@ -87,7 +96,10 @@ quoted footer identifying the command that produced that section.
 
 ## Conventions
 
-### Overview: a README.md at the project root
+<details>
+<summary><strong>Overview: a README.md at the project root</strong></summary>
+
+<br />
 
 Place a `README.md` at the root with a top-level H1 followed by a nonempty
 introduction. Agent Smith copies the Markdown between that H1 and the first
@@ -110,7 +122,12 @@ Images, badges and HTML `<img>` tags are omitted from the generated overview;
 text, useful links and code examples are preserved. The README stays unchanged.
 Use `--no-overview` to disable this section.
 
-### Main tech stack: declared tools in a root mise.toml
+</details>
+
+<details>
+<summary><strong>Main tech stack: declared tools in a root mise.toml</strong></summary>
+
+<br />
 
 Put a `mise.toml` at your project root with a nonempty `[tools]` table:
 
@@ -145,7 +162,12 @@ selects another TOML file and `title` changes the heading. An explicit
 table or an unsupported version declaration fails generation and preserves the
 existing document. The footer names the exact `agent-smith` invocation.
 
-### Available commands: a documented, grouped justfile at the project root
+</details>
+
+<details>
+<summary><strong>Available commands: a documented, grouped justfile at the project root</strong></summary>
+
+<br />
 
 Document your project's practices in a root `justfile` (also detected as
 `Justfile` or `.justfile`). Give each recipe a descriptive comment and a group,
@@ -188,7 +210,12 @@ If help fails or does not produce the supported list format, generation fails
 and the existing `AGENTS.md` is preserved. Custom help formats can be supplied
 as Markdown through a custom section instead.
 
-### Architecture decisions: an ADR directory declared in .adr-dir
+</details>
+
+<details>
+<summary><strong>Architecture decisions: an ADR directory declared in .adr-dir</strong></summary>
+
+<br />
 
 Use [adr-tools](https://github.com/npryce/adr-tools) and a root `.adr-dir` containing
 the path to your decisions directory, for example `docs/adr`. When that file exists,
@@ -218,6 +245,8 @@ output fails generation while preserving the existing document.
 Use `--no-architecture-decisions` or `[architecture_decisions].enabled = false`
 to disable this built-in, and `title` to rename its heading. Setting `enabled = true`
 explicitly requires `.adr-dir` even if it was not detected automatically.
+
+</details>
 
 ## Configure sections
 
