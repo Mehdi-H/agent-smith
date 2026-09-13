@@ -66,6 +66,7 @@ github_warning_errors = []
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "--strict-config --strict-markers --cov=agent_smith --cov-branch --cov-report=term-missing"
 filterwarnings = ["error"]
 

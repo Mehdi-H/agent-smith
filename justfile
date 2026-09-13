@@ -71,7 +71,7 @@ lint:
 # Verify that every just recipe is documented and belongs to a group.
 [group("Quality")]
 manifest-check *paths:
-    sh scripts/feedback.sh "Usage manifest" "Add the missing recipe comments and group attributes." uv run --offline --no-sync python scripts/check_manifest.py "$@"
+    sh scripts/feedback.sh "Usage manifest" "Add the missing recipe comments and group attributes." uv run --offline --no-sync python -m scripts.check_manifest "$@"
 
 # Audit GitHub Actions security offline, failing on malformed workflows too.
 [group("Quality")]
@@ -91,7 +91,7 @@ types:
 # Limit changed Python functions to cognitive complexity 8 against the branch baseline.
 [group("Quality")]
 complexity-check:
-    sh scripts/feedback.sh "Changed function complexity" "Refactor each reported function to complexity 8 or less; set COMPLEXITY_BASE to override the Git baseline." uv run --offline --no-sync python scripts/check_complexity.py
+    sh scripts/feedback.sh "Changed function complexity" "Refactor each reported function to complexity 8 or less; set COMPLEXITY_BASE to override the Git baseline." uv run --offline --no-sync python -m scripts.check_complexity
 
 # Detect missing, unused or incorrectly classified runtime dependencies.
 [group("Quality")]
@@ -121,12 +121,12 @@ test-functional:
 # Reject patching in tests; use real collaborators or explicitly injected doubles.
 [group("Quality")]
 test-doubles-check:
-    sh scripts/feedback.sh "Test doubles" "Remove patching; inject collaborators or exercise real behavior in sociable tests." uv run --offline --no-sync python scripts/check_test_doubles.py
+    sh scripts/feedback.sh "Test doubles" "Remove patching; inject collaborators or exercise real behavior in sociable tests." uv run --offline --no-sync python -m scripts.check_test_doubles
 
 # Verify Given/When/Then comments in Python tests (optional test files or directories).
 [group("Tests")]
 test-structure *paths:
-    sh scripts/feedback.sh "Test structure" "Structure each reported test with # Given, # When and # Then comments." uv run --offline --no-sync python scripts/check_test_structure.py "$@"
+    sh scripts/feedback.sh "Test structure" "Structure each reported test with # Given, # When and # Then comments." uv run --offline --no-sync python -m scripts.check_test_structure "$@"
 
 # Apply Python and justfile formatting.
 [group("Formatting")]
@@ -141,7 +141,7 @@ fmt-just:
 # Build fresh artifacts and verify the wheel in an isolated environment.
 [group("Packaging")]
 package-check:
-    sh scripts/feedback.sh "Package installation" "Fix the build or installed CLI behavior reported below." uv run --no-sync python scripts/check_package.py
+    sh scripts/feedback.sh "Package installation" "Fix the build or installed CLI behavior reported below." uv run --no-sync python -m scripts.check_package
 
 # Count collected test cases by pyramid level without executing them.
 [group("Tests")]
@@ -184,7 +184,7 @@ release-build:
 # Verify the exact wheel and sdist in dist before publication.
 [group("Release")]
 distributions-check:
-    uv run --offline --no-sync python scripts/check_distributions.py
+    uv run --offline --no-sync python -m scripts.check_distributions
 
 # Create the next semantic release from the checked main workflow.
 [group("Release")]

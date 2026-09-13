@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-CHECKER = Path(__file__).resolve().parents[2] / "scripts" / "check_complexity.py"
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def run_git(directory: Path, *args: str) -> str:
@@ -46,11 +46,11 @@ def test_changed_functions_must_meet_absolute_limit(
     source.write_text(function_source(after, result=2))
     # When the changed function is checked, even if its score stayed equal or decreased.
     result = subprocess.run(
-        [sys.executable, str(CHECKER)],
+        [sys.executable, "-m", "scripts.check_complexity"],
         cwd=tmp_path,
         capture_output=True,
         text=True,
-        env={**os.environ, "COMPLEXITY_BASE": base},
+        env={**os.environ, "COMPLEXITY_BASE": base, "PYTHONPATH": str(ROOT)},
         check=False,
     )
     # Then the absolute limit applies and failures identify the function and line.
@@ -77,17 +77,17 @@ def test_unchanged_functions_are_ignored_and_new_functions_are_checked(tmp_path:
     )
     base = run_git(tmp_path, "rev-parse", "HEAD")
     source.write_text("VALUE = 1\n\n" + function_source(9))
-    environment = {**os.environ, "COMPLEXITY_BASE": base}
+    environment = {**os.environ, "COMPLEXITY_BASE": base, "PYTHONPATH": str(ROOT)}
     # When only module content changes, then an untracked function is introduced.
     unchanged = subprocess.run(
-        [sys.executable, str(CHECKER)],
+        [sys.executable, "-m", "scripts.check_complexity"],
         cwd=tmp_path,
         capture_output=True,
         env=environment,
     )
     (tmp_path / "new.py").write_text(function_source(9))
     added = subprocess.run(
-        [sys.executable, str(CHECKER)],
+        [sys.executable, "-m", "scripts.check_complexity"],
         cwd=tmp_path,
         capture_output=True,
         env=environment,
@@ -136,8 +136,9 @@ def test_committed_branch_definitions_are_checked(tmp_path: Path, kind: str) -> 
     )
     # When the default branch comparison runs with no explicit baseline.
     environment = {key: value for key, value in os.environ.items() if key != "COMPLEXITY_BASE"}
+    environment["PYTHONPATH"] = str(ROOT)
     result = subprocess.run(
-        [sys.executable, str(CHECKER)],
+        [sys.executable, "-m", "scripts.check_complexity"],
         cwd=tmp_path,
         capture_output=True,
         text=True,

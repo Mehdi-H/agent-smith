@@ -11,6 +11,8 @@ from pathlib import Path
 
 from complexipy import code_complexity
 
+from scripts.checks.core import CheckResult, InvalidTarget, Location, Violation, run_check
+
 LIMIT = 8
 
 
@@ -89,44 +91,56 @@ def original_source(base: str, path: str) -> str:
     return git("show", f"{base}:{path}")
 
 
-def violations(path: str, before: str, after: str) -> list[str]:
-    reports = []
+def violations(path: str, before: str, after: str) -> list[Violation]:
+    reports: list[Violation] = []
     for function in changed_functions(before, after):
         result = code_complexity(function.source, no_ignore=True)
         # The first function is the selected definition, before any nested functions.
         score = result.functions[0].complexity
         if score > LIMIT:
             reports.append(
-                f"{path}:{function.line}: {function.name}: cognitive complexity {score} > {LIMIT}; "
-                f"refactor this function to a score of {LIMIT} or less."
+                Violation(
+                    message=(
+                        f"{function.name}: cognitive complexity {score} > {LIMIT}; "
+                        f"refactor this function to a score of {LIMIT} or less."
+                    ),
+                    location=Location(Path(path), line=function.line),
+                )
             )
     return reports
 
 
-def check() -> int:
-    os.chdir(git("rev-parse", "--show-toplevel").strip())
-    base = baseline()
-    reports = []
-    for path in changed_paths(base):
-        with tokenize.open(Path(path)) as stream:
-            after = stream.read()
-        reports.extend(violations(path, original_source(base, path), after))
-    if reports:
-        print("\n".join(reports), file=sys.stderr)
-        return 1
-    return 0
+class ChangedComplexityCheck:
+    """Check changed Python functions against the absolute complexity limit."""
+
+    name = "Changed function complexity"
+
+    def evaluate(self, target: Path | None) -> CheckResult:
+        """Evaluate changed Python files relative to the selected Git baseline."""
+        if target is None:
+            return CheckResult(
+                (InvalidTarget("check_complexity.py", "Usage: check_complexity.py"),)
+            )
+        if not target.is_dir():
+            return CheckResult(
+                (InvalidTarget(str(target), "repository directory does not exist."),)
+            )
+        os.chdir(target)
+        os.chdir(git("rev-parse", "--show-toplevel").strip())
+        base = baseline()
+        reports: list[Violation] = []
+        for path in changed_paths(base):
+            with tokenize.open(Path(path)) as stream:
+                after = stream.read()
+            reports.extend(violations(path, original_source(base, path), after))
+        return CheckResult.from_problems(reports)
 
 
-def main() -> int:
-    try:
-        return check()
-    except (OSError, ValueError, SyntaxError, subprocess.CalledProcessError) as error:
-        print(
-            f"Cannot check complexity: {error}. Verify Git history and Python sources.",
-            file=sys.stderr,
-        )
-        return 1
+def main(arguments: list[str]) -> int:
+    """Adapt command-line arguments to the shared feedback-check runner."""
+    target = Path.cwd() if not arguments else None
+    return run_check(ChangedComplexityCheck(), target)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main(sys.argv[1:]))
