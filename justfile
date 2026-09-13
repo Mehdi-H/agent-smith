@@ -54,6 +54,13 @@ build:
 check: lint types dependencies bandit-check secrets-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check
     sh scripts/feedback.sh "Unit tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q tests/unit
 
+# Run every repository-wide quality, maintenance, test, package and release check (network required).
+[group("Quality")]
+check-repo-wide: check cli-check package-check audit-check updates-check workflow-warnings
+    sh scripts/feedback.sh "All tests" "Fix the failing test or coverage diagnostics reported below." just test
+    sh scripts/feedback.sh "Repository complexity" "Refactor every reported function to cognitive complexity 8 or less." uv run --offline --no-sync complexipy src scripts tests --max-complexity-allowed 8 --no-ignore --check-script
+    sh scripts/feedback.sh "Release preview" "Fix the semantic-release diagnostics before preparing a release." just release-preview
+
 # Check Python lint rules and Python/justfile formatting without changing files.
 [group("Quality")]
 lint:
