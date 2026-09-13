@@ -7,7 +7,11 @@ from textwrap import indent
 
 import pytest
 
-CHECKER = Path(__file__).resolve().parents[2] / "scripts" / "check_test_structure.py"
+from scripts.check_test_structure import TestStructureCheck
+from scripts.checks.core import IncompleteCheck, Location, Violation
+
+REPOSITORY = Path(__file__).resolve().parents[2]
+CHECKER = "scripts.check_test_structure"
 
 
 @pytest.mark.parametrize(
@@ -31,10 +35,11 @@ def test_structure_recognizes_only_ordered_standalone_markers(
     source.write_text("def test_example():\n" + indent(body, "    ") + "\n")
     # When the checker inspects the source without executing it.
     result = subprocess.run(
-        [sys.executable, str(CHECKER), str(source)],
+        [sys.executable, "-m", CHECKER, str(source)],
         capture_output=True,
         text=True,
         timeout=10,
+        cwd=REPOSITORY,
     )
     # Then only the valid structure succeeds silently; failures locate the test.
     assert result.returncode == (0 if valid else 1)
@@ -57,10 +62,11 @@ def test_structure_supports_async_methods(tmp_path: Path) -> None:
     )
     # When the checker discovers files in the directory.
     result = subprocess.run(
-        [sys.executable, str(CHECKER), str(tmp_path)],
+        [sys.executable, "-m", CHECKER, str(tmp_path)],
         capture_output=True,
         text=True,
         timeout=10,
+        cwd=REPOSITORY,
     )
     # Then the valid asynchronous method passes silently.
     assert result.returncode == 0
@@ -75,11 +81,37 @@ def test_structure_invalid_inputs_fail(content: str | None, tmp_path: Path) -> N
         source.write_text(content)
     # When the checker tries to inspect it.
     result = subprocess.run(
-        [sys.executable, str(CHECKER), str(source)],
+        [sys.executable, "-m", CHECKER, str(source)],
         capture_output=True,
         text=True,
         timeout=10,
+        cwd=REPOSITORY,
     )
     # Then the check fails with the offending path instead of silently passing.
     assert result.returncode == 1
     assert str(source) in result.stderr
+
+
+def test_structure_evaluation_returns_typed_violations(tmp_path: Path) -> None:
+    # Given a test file whose structural markers are incomplete.
+    source = tmp_path / "test_example.py"
+    source.write_text("def test_example():\n    # Given\n    assert True\n")
+    # When the domain evaluator inspects the file directly.
+    result = TestStructureCheck().evaluate(source)
+    # Then it returns a located violation without printing from the domain layer.
+    assert len(result.problems) == 1
+    problem = result.problems[0]
+    assert isinstance(problem, Violation)
+    assert problem.location == Location(source, line=1)
+    assert "test_example" in problem.message
+
+
+def test_structure_evaluation_reports_unreadable_source(tmp_path: Path) -> None:
+    # Given a test path containing invalid Python source.
+    source = tmp_path / "test_broken.py"
+    source.write_text("def broken(:\n")
+    # When the domain evaluator parses the source directly.
+    result = TestStructureCheck().evaluate(source)
+    # Then incomplete evaluation is represented explicitly and fails closed.
+    assert result.exit_code == 1
+    assert isinstance(result.problems[0], IncompleteCheck)

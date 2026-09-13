@@ -1,5 +1,6 @@
 """The test-double policy gives source locations without executing test code."""
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -17,9 +18,10 @@ def test_test_double_policy_reports_source_lines(tmp_path: Path, fixture: str, s
     source.write_text(content)
     # When the policy inspects the source without importing it.
     result = subprocess.run(
-        [sys.executable, str(ROOT / "scripts" / "check_test_doubles.py"), str(tmp_path)],
+        [sys.executable, "-m", "scripts.check_test_doubles", str(tmp_path)],
         capture_output=True,
         text=True,
+        env={**os.environ, "PYTHONPATH": str(ROOT)},
     )
     # Then forbidden examples have a diagnostic for each source line; allowed ones are silent.
     assert result.returncode == status

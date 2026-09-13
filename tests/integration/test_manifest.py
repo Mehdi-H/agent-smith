@@ -6,7 +6,11 @@ from pathlib import Path
 
 import pytest
 
-CHECKER = Path(__file__).resolve().parents[2] / "scripts" / "check_manifest.py"
+from scripts.check_manifest import ManifestCheck
+from scripts.checks.core import InvalidTarget, Violation
+
+REPOSITORY = Path(__file__).resolve().parents[2]
+CHECKER = "scripts.check_manifest"
 
 
 @pytest.mark.parametrize(
@@ -28,10 +32,11 @@ def test_manifest_requires_documentation_and_group(
     manifest.write_text(prefix + "sample:\n    exit 99\n")
     # When the checker inspects the manifest without running its recipe.
     result = subprocess.run(
-        [sys.executable, str(CHECKER), str(manifest)],
+        [sys.executable, "-m", CHECKER, str(manifest)],
         capture_output=True,
         text=True,
         timeout=10,
+        cwd=REPOSITORY,
     )
     # Then only the complete declaration succeeds, with specific failure guidance.
     assert result.returncode == (1 if missing else 0)
@@ -51,13 +56,39 @@ def test_manifest_checks_imported_private_recipes(tmp_path: Path) -> None:
     (tmp_path / "helpers.just").write_text("_helper:\n    exit 99\n")
     # When just parses the import and the checker inspects its recipes.
     result = subprocess.run(
-        [sys.executable, str(CHECKER), str(manifest)],
+        [sys.executable, "-m", CHECKER, str(manifest)],
         capture_output=True,
         text=True,
         timeout=10,
+        cwd=REPOSITORY,
     )
     # Then the private helper cannot evade the manifest contract.
     assert result.returncode == 1
     assert "_helper" in result.stderr
     assert "documentation" in result.stderr
     assert "group" in result.stderr
+
+
+def test_manifest_evaluation_returns_typed_violations(tmp_path: Path) -> None:
+    # Given a justfile recipe missing both parts of the manifest contract.
+    manifest = tmp_path / "justfile"
+    manifest.write_text("sample:\n    exit 99\n")
+    # When the domain evaluator inspects the manifest directly.
+    result = ManifestCheck().evaluate(manifest)
+    # Then each finding has a discriminating type, rule and source location.
+    assert [type(problem) for problem in result.problems] == [Violation, Violation]
+    for problem, rule in zip(result.problems, ("documentation", "group"), strict=True):
+        assert isinstance(problem, Violation)
+        assert problem.rule == rule
+        assert problem.location is not None
+        assert problem.location.path == manifest
+
+
+def test_manifest_evaluation_rejects_a_missing_target(tmp_path: Path) -> None:
+    # Given a path that does not identify a justfile.
+    target = tmp_path / "missing.just"
+    # When the domain evaluator receives that target.
+    result = ManifestCheck().evaluate(target)
+    # Then it reports an invalid target instead of claiming a successful check.
+    assert result.exit_code == 1
+    assert isinstance(result.problems[0], InvalidTarget)
