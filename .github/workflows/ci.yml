@@ -27,7 +27,7 @@ jobs:
       COMPLEXITY_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
       UV_PYTHON: ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -47,7 +47,7 @@ jobs:
           !cancelled() && hashFiles('junit.xml') != '' &&
           github.ref == 'refs/heads/main' && matrix.python-version == '3.14' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        uses: codecov/codecov-action@0b35c9ecc4f0529d0eb674914510c22f85b196b4 # v7.1.0
         with:
           use_oidc: true
           files: junit.xml
@@ -60,7 +60,7 @@ jobs:
           !cancelled() && hashFiles('coverage.xml') != '' &&
           github.ref == 'refs/heads/main' && matrix.python-version == '3.14' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        uses: codecov/codecov-action@0b35c9ecc4f0529d0eb674914510c22f85b196b4 # v7.1.0
         with:
           use_oidc: true
           files: coverage.xml
