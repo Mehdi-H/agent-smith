@@ -2,6 +2,41 @@
 
 <!-- version list -->
 
+## v0.6.0 (2026-09-16)
+
+### Chores
+
+- Update tools and lock Python dependencies 🧹
+  ([`f89c5cc`](https://github.com/Mehdi-H/agent-smith/commit/f89c5cc90d490f08f7e2bb4aa88fa7125aa24341))
+
+- **quality**: Add repository-wide check harness 🧹
+  ([`9451870`](https://github.com/Mehdi-H/agent-smith/commit/9451870d9e5d9fef7d6e826ffd45e4465c022e35))
+
+- **security**: Scan commits for secrets with Betterleaks 🧹
+  ([`e5fcd83`](https://github.com/Mehdi-H/agent-smith/commit/e5fcd832864a5cdf4e4acb7ad2b111dcf5060a9b))
+
+### Documentation
+
+- Refresh terminal demonstration 📝
+  ([`41c79a3`](https://github.com/Mehdi-H/agent-smith/commit/41c79a340e60abd0eeffc38a4a5bd7b60ccbbccd))
+
+- Refresh terminal demonstration 📝
+  ([`443d0b5`](https://github.com/Mehdi-H/agent-smith/commit/443d0b5f99f6da70bc6147da34361c9ea7fca502))
+
+- **readme**: Refresh introduction and conventions 📝
+  ([`ec33d90`](https://github.com/Mehdi-H/agent-smith/commit/ec33d90ed9a29f8fbddd176b989a9041db6a4273))
+
+### Features
+
+- **quality**: Enforce Action SHA pinning with update check ✨
+  ([`6f34958`](https://github.com/Mehdi-H/agent-smith/commit/6f349588d6206cb8584e51d836e0e2842e2348fc))
+
+### Refactoring
+
+- Unify Python feedback check contracts ♻️
+  ([`7289eef`](https://github.com/Mehdi-H/agent-smith/commit/7289eef79cd4bdf514aec33d923c4c3c57cc3e7b))
+
+
 ## v0.5.0 (2026-09-12)
 
 ### Chores
