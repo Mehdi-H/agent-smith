@@ -51,12 +51,12 @@ build:
 
 # Check lint, formatting, types, dependencies, secrets and fast tests without network or sync.
 [group("Quality")]
-check: lint types dependencies bandit-check secrets-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check
+check: lint types dependencies bandit-check secrets-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check sha-pinning-check
     sh scripts/feedback.sh "Unit tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q tests/unit
 
 # Run every repository-wide quality, maintenance, test, package and release check (network required).
 [group("Quality")]
-check-repo-wide: check cli-check package-check audit-check updates-check workflow-warnings
+check-repo-wide: check cli-check package-check audit-check updates-check sha-update-check workflow-warnings
     sh scripts/feedback.sh "All tests" "Fix the failing test or coverage diagnostics reported below." just test
     sh scripts/feedback.sh "Repository complexity" "Refactor every reported function to cognitive complexity 8 or less." uv run --offline --no-sync complexipy src scripts tests --max-complexity-allowed 8 --no-ignore --check-script
     sh scripts/feedback.sh "Release preview" "Fix the semantic-release diagnostics before preparing a release." just release-preview
@@ -77,6 +77,16 @@ manifest-check *paths:
 [group("Quality")]
 workflows-check:
     sh scripts/feedback.sh "Workflow security" "Fix the Zizmor findings in .github/workflows; inspect the reported rule and location." zizmor --offline --strict-collection --no-progress .github/workflows
+
+# Check that external Actions are pinned to full-length commit SHAs, offline.
+[group("Quality")]
+sha-pinning-check *paths:
+    sh scripts/feedback.sh "Action SHA pinning" "Pin every external Action to its full-length 40-character commit SHA as reported below; allowlisted Actions are set in repository settings." uv run --offline --no-sync python -m scripts.checks.sha_pinning "$@"
+
+# Check pinned external Actions against the latest published releases (network required).
+[group("Quality")]
+sha-update-check *paths:
+    sh scripts/feedback.sh "Action SHA updates" "Replace each reported pin with the shown release version and full-length commit SHA, or fix the gh or network failure reported below." uv run --offline --no-sync python -m scripts.checks.sha_update "$@"
 
 # Validate local skill structure strictly (optional skill or collection directory).
 [group("Quality")]
