@@ -47,7 +47,7 @@ jobs:
           !cancelled() && hashFiles('junit.xml') != '' &&
           github.ref == 'refs/heads/main' && matrix.python-version == '3.14' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        uses: codecov/codecov-action@0b35c9ecc4f0529d0eb674914510c22f85b196b4 # v7.1.0
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           use_oidc: true
           files: junit.xml
@@ -60,7 +60,7 @@ jobs:
           !cancelled() && hashFiles('coverage.xml') != '' &&
           github.ref == 'refs/heads/main' && matrix.python-version == '3.14' &&
           (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        uses: codecov/codecov-action@0b35c9ecc4f0529d0eb674914510c22f85b196b4 # v7.1.0
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           use_oidc: true
           files: coverage.xml
