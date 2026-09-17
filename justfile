@@ -51,7 +51,7 @@ build:
 
 # Check lint, formatting, types, dependencies, secrets and fast tests without network or sync.
 [group("Quality")]
-check: lint types dependencies bandit-check secrets-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check sha-pinning-check
+check: setup lint types dependencies bandit-check secrets-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check sha-pinning-check
     sh scripts/feedback.sh "Unit tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q tests/unit
 
 # Run every repository-wide quality, maintenance, test, package and release check (network required).
@@ -189,7 +189,13 @@ release-preview:
 release-build:
     uv lock --upgrade-package agent-smith-cli
     just build
+    just dist-audit
     just distributions-check
+
+# Audit wheel and sdist contents, metadata, integrity and equivalence before publication.
+[group("Release")]
+dist-audit:
+    sh scripts/feedback.sh "Distribution audit" "Fix the reported artifact problem and rebuild with just build, or extend the allowlist in scripts/check_dist_audit.py if intentional." uv run --offline --no-sync python -m scripts.check_dist_audit
 
 # Verify the exact wheel and sdist in dist before publication.
 [group("Release")]
