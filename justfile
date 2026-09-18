@@ -128,6 +128,11 @@ test-integration:
 test-functional:
     uv run --offline --no-sync pytest tests/functional || exit 1
 
+# Run mutation testing with mutmut against the fast unit test suite.
+[group("Tests")]
+test-mutation:
+    uv run --offline --no-sync mutmut run || exit 1
+
 # Reject patching in tests; use real collaborators or explicitly injected doubles.
 [group("Quality")]
 test-doubles-check:

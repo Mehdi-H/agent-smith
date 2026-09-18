@@ -35,6 +35,7 @@ dev = [
     "bandit[toml]>=1.9.4",
     "complexipy>=8,<9",
     "deptry>=0.25.1",
+    "mutmut>=3.7.0",
     "pip-audit>=2.10.1",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
@@ -76,6 +77,17 @@ patch = ["subprocess"]
 
 [tool.coverage.report]
 show_missing = true
+
+[tool.mutmut]
+source_paths = ["src"]
+# Mutation runs scope to the fast unit suite; integration/functional tests
+# spawn subprocesses and would blow up per-mutant runtimes.
+pytest_add_cli_args_test_selection = ["tests/unit"]
+# Strip coverage addopts: pytest-cov would slow every mutant run.
+pytest_add_cli_args = ["-o", "addopts="]
+# Unit tests import scripts.checks; pytest's pythonpath="." resolves to the
+# mutants/ workdir, so the scripts package must be copied there too.
+also_copy = ["scripts"]
 
 [tool.semantic_release]
 allow_zero_version = true
