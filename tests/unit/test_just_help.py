@@ -37,6 +37,8 @@ def test_help_preserves_groups_signatures_and_descriptions() -> None:
         ("Available recipes:\n    \x1b[32mcheck\x1b[0m\n", "- `just check`"),
         ("Available recipes:\n    show value='`example`'\n", "- ``just show value='`example`'``"),
         ("Available recipes:\n    [A *group*]\n    check\n", "### A \\*group\\*\n\n- `just check`"),
+        ("Available recipes:\n check\n", "- `just check`"),
+        ("Available recipes:\n    show [beta]\n", "- `just show [beta]`"),
     ],
 )
 def test_help_normalizes_terminal_formatting(output: str, expected: str) -> None:
@@ -49,21 +51,21 @@ def test_help_normalizes_terminal_formatting(output: str, expected: str) -> None
 
 
 @pytest.mark.parametrize(
-    "output",
+    ("output", "message"),
     [
-        "",
-        "Available recipes:\n",
-        "Custom help",
-        "Available recipes:\ncheck",
-        "Available recipes:\n    [Empty]\n",
-        "Available recipes:\n    !invalid",
+        ("", "Expected just help to print the standard just --list output."),
+        ("Available recipes:\n", "just help did not list any available commands."),
+        ("Custom help", "Expected just help to print the standard just --list output."),
+        ("Available recipes:\ncheck", "Unsupported just help output: 'check'."),
+        ("Available recipes:\n    [Empty]\n", "just help did not list any available commands."),
+        ("Available recipes:\n    !invalid", "Unsupported just help recipe: '!invalid'."),
     ],
 )
-def test_unrecognized_help_fails_instead_of_inventing_commands(output: str) -> None:
+def test_unrecognized_help_fails_instead_of_inventing_commands(output: str, message: str) -> None:
     # Given output outside the supported just list convention.
     parser = JustHelpParser()
     # When the built-in tries to interpret it.
-    with pytest.raises(GenerationError) as error:
+    with pytest.raises(GenerationError) as failure:
         parser.render(output)
     # Then an actionable error is raised instead of publishing an incorrect manifest.
-    assert str(error.value)
+    assert str(failure.value) == message

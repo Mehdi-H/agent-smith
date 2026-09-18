@@ -16,6 +16,7 @@ from agent_smith.application.ports import GenerationError
         ('"github:org/tool" = "latest"', "- `github:org/tool` — `latest`"),
         ('"a`b" = "ref:main"', "- ``a`b`` — `ref:main`"),
         ('python = "{{env.VERSION}}"', "- `python` — `{{env.VERSION}}`"),
+        ('python = "3.14 rc 1"', "- `python` — `3.14 rc 1`"),
     ],
 )
 def test_supported_tool_declarations(declaration: str, expected: str) -> None:
@@ -41,28 +42,44 @@ def test_preserves_declaration_order_and_ignores_other_tables() -> None:
 
 
 @pytest.mark.parametrize(
-    "content",
+    ("content", "message"),
     [
-        "[broken",
-        "",
-        "[tools]",
-        'tools = "bad"',
-        "[tools]\npython = 3",
-        "[tools]\npython = true",
-        "[tools]\npython = []",
-        '[tools]\npython = ""',
-        '[tools]\npython = {os = "linux"}',
-        '[tools]\npython = {version = ["3.14"]}',
-        '[tools]\npython = [["3.14"]]',
-        '[tools]\n"bad\\nname" = "1"',
-        '[tools]\npython = "bad\\nversion"',
+        ("[broken", "Invalid mise TOML"),
+        ("", "Expected a nonempty [tools] table in mise.toml."),
+        ("[tools]", "Expected a nonempty [tools] table in mise.toml."),
+        ('tools = "bad"', "Expected a nonempty [tools] table in mise.toml."),
+        ("[tools]\npython = 3", "tools.python.version must be a nonempty, single-line string."),
+        ("[tools]\npython = true", "tools.python.version must be a nonempty, single-line string."),
+        ("[tools]\npython = []", "tools.python must declare at least one version."),
+        ('[tools]\npython = ""', "tools.python.version must be a nonempty, single-line string."),
+        (
+            '[tools]\npython = {os = "linux"}',
+            "tools.python.version must be a nonempty, single-line string.",
+        ),
+        (
+            '[tools]\npython = {version = ["3.14"]}',
+            "tools.python.version must be a nonempty, single-line string.",
+        ),
+        (
+            '[tools]\npython = [["3.14"]]',
+            "tools.python.version must be a nonempty, single-line string.",
+        ),
+        (
+            '[tools]\npython = ["3.14", 3]',
+            "tools.python.version must be a nonempty, single-line string.",
+        ),
+        ('[tools]\n"bad\\nname" = "1"', "Tool name must be a nonempty, single-line string."),
+        (
+            '[tools]\npython = "bad\\nversion"',
+            "tools.python.version must be a nonempty, single-line string.",
+        ),
     ],
 )
-def test_invalid_tools_report_actionable_errors(content: str) -> None:
+def test_invalid_tools_report_actionable_errors(content: str, message: str) -> None:
     # Given malformed TOML, an empty tools table or an unsupported declaration.
     parser = MiseTechStackParser()
     # When rendering is requested.
-    with pytest.raises(GenerationError) as error:
+    with pytest.raises(GenerationError) as failure:
         parser.render(content)
     # Then the parser returns a diagnostic instead of inventing a version.
-    assert str(error.value)
+    assert str(failure.value).startswith(message)

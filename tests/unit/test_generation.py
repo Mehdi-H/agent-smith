@@ -67,6 +67,16 @@ def test_generation_renders_order_and_exact_provenance() -> None:
     )
 
 
+def test_section_titles_may_contain_any_letter() -> None:
+    # Given a section whose title happens to contain the letter X.
+    ports = Ports()
+    request = GenerationRequest(sections=(CommandSection("X", "echo ok"),))
+    # When the document is generated.
+    GenerationService(ports, ports, ports, ports, ports, ports, AdrListParser()).generate(request)
+    # Then the ordinary letter is accepted in the title.
+    assert "## X" in ports.files["AGENTS.md"]
+
+
 def test_failure_preserves_existing_document() -> None:
     # Given an existing output and a custom command that fails after overview extraction.
     ports = Ports(failure=True)
@@ -82,31 +92,65 @@ def test_failure_preserves_existing_document() -> None:
 
 
 @pytest.mark.parametrize(
-    "generation_request",
+    ("generation_request", "message"),
     [
-        GenerationRequest(output=""),
-        GenerationRequest(output="bad\nname"),
-        GenerationRequest(sections=()),
-        GenerationRequest(sections=(CommandSection("", "ok"),)),
-        GenerationRequest(sections=(CommandSection("bad\ntitle", "ok"),)),
-        GenerationRequest(sections=(CommandSection("Title", ""),)),
-        GenerationRequest(sections=(CommandSection("Title", "bad\ncommand"),)),
+        (GenerationRequest(output=""), "The output path must be nonempty and on one line."),
+        (
+            GenerationRequest(output="bad\nname"),
+            "The output path must be nonempty and on one line.",
+        ),
+        (
+            GenerationRequest(output="bad\rname"),
+            "The output path must be nonempty and on one line.",
+        ),
+        (
+            GenerationRequest(sections=()),
+            "No sections enabled; enable overview or configure a section.",
+        ),
+        (
+            GenerationRequest(sections=(CommandSection("", "ok"),)),
+            "Section titles must be nonempty and on one line.",
+        ),
+        (
+            GenerationRequest(sections=(CommandSection("bad\ntitle", "ok"),)),
+            "Section titles must be nonempty and on one line.",
+        ),
+        (
+            GenerationRequest(sections=(CommandSection("bad\rtitle", "ok"),)),
+            "Section titles must be nonempty and on one line.",
+        ),
+        (
+            GenerationRequest(sections=(CommandSection("Title", ""),)),
+            "Section commands must be nonempty and on one line.",
+        ),
+        (
+            GenerationRequest(sections=(CommandSection("Title", "bad\ncommand"),)),
+            "Section commands must be nonempty and on one line.",
+        ),
     ],
 )
-def test_invalid_requests_do_not_write(generation_request: GenerationRequest) -> None:
+def test_invalid_requests_do_not_write(generation_request: GenerationRequest, message: str) -> None:
     # Given an invalid generation request and fresh in-memory ports.
     ports = Ports()
     # When the request is validated.
-    with pytest.raises(GenerationError):
+    with pytest.raises(GenerationError) as failure:
         GenerationService(ports, ports, ports, ports, ports, ports, AdrListParser()).generate(
             generation_request
         )
-    # Then the output is not created.
+    # Then the failure is actionable and the output is not created.
+    assert str(failure.value) == message
     assert "AGENTS.md" not in ports.files
 
 
 @pytest.mark.parametrize(
-    ("source", "expected"), [("\r\n  code  \r\n", "  code  "), ("\n\n", ""), ("A\n\nB\n", "A\n\nB")]
+    ("source", "expected"),
+    [
+        ("\r\n  code  \r\n", "  code  "),
+        ("\n\n", ""),
+        ("A\n\nB\n", "A\n\nB"),
+        ("A\r\n\r\nB\r\n", "A\n\nB"),
+        ("A\rB", "A\nB"),
+    ],
 )
 def test_content_normalization_preserves_meaning(source: str, expected: str) -> None:
     # Given content with line endings and meaningful internal whitespace.
@@ -124,6 +168,9 @@ def test_content_normalization_preserves_meaning(source: str, expected: str) -> 
         ("echo `date`", "`` echo `date` ``"),
         ("`value`", "`` `value` ``"),
         (" hi ", "`  hi  `"),
+        ("`x", "`` `x ``"),
+        ("x ", "` x  `"),
+        (" x", "`  x `"),
     ],
 )
 def test_provenance_quotes_literal_commands(value: str, expected: str) -> None:
@@ -136,12 +183,12 @@ def test_provenance_quotes_literal_commands(value: str, expected: str) -> None:
 
 
 def test_heading_escapes_markdown_syntax() -> None:
-    # Given a title containing formatting and links.
-    title = "[Overview](url) *bold*"
+    # Given a title containing formatting, links and an ordinary capital X.
+    title = "[Overview](url) *bold* X"
     # When the title is rendered as plain heading text.
     result = heading(title)
     # Then Markdown syntax is escaped while ordinary text is retained.
-    assert result == "\\[Overview\\](url) \\*bold\\*"
+    assert result == "\\[Overview\\](url) \\*bold\\* X"
 
 
 def test_available_commands_uses_injected_parser_and_exact_provenance() -> None:

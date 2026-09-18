@@ -23,6 +23,8 @@ from agent_smith.application.ports import GenerationError
         ("# Project\n\n### Detail\nKeep\n\n## Usage", "### Detail\nKeep"),
         ("# Project\n\n##not-heading\n\n## Usage", "##not-heading"),
         ("# Project\r\n\r\nCafé 🕶️\r\n\r\n## Usage", "Café 🕶️"),
+        ("# Project\rIntro\r## Usage", "Intro"),
+        ("# Project\r\n\r\nA\r\n\r\nB\r\n\r\n## Usage", "A\n\nB"),
         ("\ufeff# Project\nIntro\n## Usage", "Intro"),
         ("Before\n\n## Earlier\n\n# Project\nIntro\n## Usage", "Intro"),
         (
@@ -41,26 +43,29 @@ def test_extracts_only_overview_source(source: str, expected: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "source",
+    ("source", "message"),
     [
-        "",
-        "No heading",
-        "## Only H2",
-        "> # Quoted\nIntro",
-        "```\n# Code\n```",
-        "# Empty\n\n## Usage",
-        "# Empty",
-        "# One\nIntro\n# Two\nOther",
+        ("", "README overview requires a top-level Markdown H1."),
+        ("No heading", "README overview requires a top-level Markdown H1."),
+        ("## Only H2", "README overview requires a top-level Markdown H1."),
+        ("> # Quoted\nIntro", "README overview requires a top-level Markdown H1."),
+        ("```\n# Code\n```", "README overview requires a top-level Markdown H1."),
+        ("# Empty\n\n## Usage", "README overview is empty between its H1 and first H2."),
+        ("# Empty", "README overview is empty between its H1 and first H2."),
+        (
+            "# One\nIntro\n# Two\nOther",
+            "README has another H1 before its first overview-ending H2.",
+        ),
     ],
 )
-def test_invalid_overviews_report_a_domain_error(source: str) -> None:
+def test_invalid_overviews_report_a_domain_error(source: str, message: str) -> None:
     # Given a document without an unambiguous nonempty overview.
     parser = MarkdownOverviewParser()
     # When extraction is requested.
     with pytest.raises(GenerationError) as failure:
         parser.extract(source)
     # Then the error describes the README convention.
-    assert "README" in str(failure.value)
+    assert str(failure.value) == message
 
 
 @pytest.mark.parametrize(
@@ -88,9 +93,26 @@ def test_invalid_overviews_report_a_domain_error(source: str) -> None:
             '```md\n![example](image.png)\n<img src="example">\n```',
         ),
         ("    ![example](image.png)\n\nIntro", "    ![example](image.png)\n\nIntro"),
+        (
+            "    a\n" * 8 + "\ntext\n\n    ![x](y.png)\n\nIntro",
+            "    a\n" * 8 + "\ntext\n\n    ![x](y.png)\n\nIntro",
+        ),
         ("\\![literal](image.png)\n\nIntro", "\\![literal](image.png)\n\nIntro"),
         ('<!-- <img src="hidden"> -->\n\nIntro', '<!-- <img src="hidden"> -->\n\nIntro'),
         ("**Intro** with [documentation](docs.md).", "**Intro** with [documentation](docs.md)."),
+        ("[ ](url)\n\nIntro", "Intro"),
+        ("[<br>](url)\n\nIntro", "[<br>](url)\n\nIntro"),
+        ('[<img src="i.png">](url)\n\nIntro', "Intro"),
+        (
+            '<a href="x"><img src="i.png"> caption</a>\n\nIntro',
+            '<a href="x"> caption</a>\n\nIntro',
+        ),
+        ("~~~\n![a](b.png)\n~~~\n\nIntro", "~~~\n![a](b.png)\n~~~\n\nIntro"),
+        ("```\nx\n```\n![a](b.png)\n\nIntro", "```\nx\n```\n\n\nIntro"),
+        (
+            "```\nl0\nl1\nl2\nl3\nl4\nl5\nl6\nl7\nl8\nl9\nl10\nl11\nl12\n```\n\n```\n![x](y.png)\n```\n\nIntro",
+            "```\nl0\nl1\nl2\nl3\nl4\nl5\nl6\nl7\nl8\nl9\nl10\nl11\nl12\n```\n\n```\n![x](y.png)\n```\n\nIntro",
+        ),
     ],
 )
 def test_overview_removes_rendered_images_and_preserves_text(body: str, expected: str) -> None:
@@ -109,4 +131,4 @@ def test_image_only_overview_is_empty_after_sanitization() -> None:
     with pytest.raises(GenerationError) as failure:
         parser.extract("# Project\n\n[![CI](badge.svg)](https://ci)\n\n## Usage")
     # Then the existing empty-overview convention remains enforced.
-    assert "empty" in str(failure.value)
+    assert str(failure.value) == "README overview is empty between its H1 and first H2."
