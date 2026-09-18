@@ -1,5 +1,7 @@
 """CLI translation uses incoming ports without touching files or processes."""
 
+import re
+import sys
 from dataclasses import dataclass, field
 
 import pytest
@@ -119,6 +121,45 @@ def test_generation_errors_have_no_traceback(capsys: pytest.CaptureFixture[str])
     # Then the public failure is actionable and confined to stderr.
     assert status == 1
     assert capsys.readouterr() == ("", "agent-smith: Cannot read README.md\n")
+
+
+def test_help_documents_every_option_verbatim(capsys: pytest.CaptureFixture[str]) -> None:
+    # Given the CLI parser and a help request.
+    services = Services()
+    # When help is printed.
+    with pytest.raises(SystemExit):
+        run(["--help"], version="1.2.3", configuration=services, generator=services)
+    # Then the description, epilog and every option help text appear intact, with no
+    # extra characters glued to them (letter boundaries reject padded mutations).
+    help_text = " ".join(capsys.readouterr().out.split())
+    for fragment in [
+        "Build agent instructions from your project's sources.",
+        "Detects README.md, mise.toml, justfile and .adr-dir; see agent-smith.toml.",
+        "--config PATH",
+        "Read this TOML configuration file.",
+        "--output PATH",
+        "Override the output path (default: AGENTS.md).",
+        "Disable the built-in README overview.",
+        "Disable the built-in just help section.",
+        "Disable the built-in mise.toml tech stack.",
+        "Disable the built-in adr list section.",
+    ]:
+        assert re.search(rf"(?<![A-Za-z]){re.escape(fragment)}(?![A-Za-z])", help_text)
+
+
+def test_real_invocation_reads_process_arguments() -> None:
+    # Given process arguments as passed by the operating system.
+    services = Services()
+    original = sys.argv
+    sys.argv = ["agent-smith", "--output", "process.md"]
+    # When the CLI runs without an explicit argument list.
+    try:
+        status = run(None, version="1.2.3", configuration=services, generator=services)
+    finally:
+        sys.argv = original
+    # Then the process arguments drive the request.
+    assert status == 0
+    assert services.loaded == [(None, "process.md", False, False, False, False)]
 
 
 def test_provenance_preserves_cli_arguments_with_shell_quoting() -> None:

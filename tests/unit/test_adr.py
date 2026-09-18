@@ -39,23 +39,45 @@ def test_literals_and_line_endings_are_preserved_safely(
 
 
 @pytest.mark.parametrize(
-    ("directory", "listing"),
+    ("directory", "listing", "message"),
     [
-        ("", "docs/adr/0001-test.md"),
-        ("docs/adr\nother", "docs/adr/0001-test.md"),
-        ("docs/adr", ""),
-        ("docs/adr", " \n"),
-        ("docs/adr", "Command failed"),
-        ("docs/adr", "other/0001-test.md"),
-        ("docs/adr", "docs/adr/0001-test.txt"),
-        ("docs/adr", "docs/adr/0001-\tbad.md"),
+        ("", "docs/adr/0001-test.md", ".adr-dir must contain a nonempty directory on one line."),
+        (
+            "docs/adr\nother",
+            "docs/adr/0001-test.md",
+            ".adr-dir must contain a nonempty directory on one line.",
+        ),
+        ("docs/adr", "", "adr list returned no architecture decisions."),
+        ("docs/adr", " \n", "adr list returned no architecture decisions."),
+        (
+            "docs/adr",
+            "Command failed",
+            "Unexpected adr list path 'Command failed' for directory 'docs/adr'.",
+        ),
+        (
+            "docs/adr",
+            "other/0001-test.md",
+            "Unexpected adr list path 'other/0001-test.md' for directory 'docs/adr'.",
+        ),
+        (
+            "docs/adr",
+            "docs/adr/0001-test.txt",
+            "Unexpected adr list path 'docs/adr/0001-test.txt' for directory 'docs/adr'.",
+        ),
+        (
+            "docs/adr",
+            "docs/adr/0001-\tbad.md",
+            "ADR filenames must be nonempty and on one line.",
+        ),
     ],
 )
-def test_invalid_metadata_and_command_output_fail(directory: str, listing: str) -> None:
+def test_invalid_metadata_and_command_output_fail(
+    directory: str, listing: str, message: str
+) -> None:
     # Given malformed metadata or a listing inconsistent with its declared directory.
     parser = AdrListParser()
     # When the parser validates it.
     with pytest.raises(GenerationError) as failure:
         parser.render(directory, listing)
     # Then an actionable diagnostic is provided.
-    assert str(failure.value)
+    assert str(failure.value) == message
