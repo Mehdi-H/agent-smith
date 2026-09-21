@@ -1,7 +1,7 @@
 #!/bin/sh
 # Record the real installed CLI in this checkout and verify generation succeeded.
 set -eu
-for program in vhs ffmpeg less ttyd watch; do
+for program in vhs ffmpeg ffprobe less ttyd watch; do
     if ! command -v "$program" >/dev/null 2>&1; then
         printf 'Missing %s; see the terminal demo setup in CONTRIBUTING.md.\n' "$program" >&2
         exit 1
@@ -48,6 +48,12 @@ for artifact in "$scratch/agent-smith.mp4" "$scratch/agent-smith.gif"; do
         exit 1
     fi
 done
+# Fail before publishing when the exports lost the recorded geometry or animation.
+if ! uv run --offline --no-sync python -m scripts.checks.demo \
+    "$scratch/agent-smith.gif" "$scratch/agent-smith.mp4"; then
+    printf '%s\n' 'The recording did not render correctly; see the diagnostics above.' >&2
+    exit 1
+fi
 mv "$scratch/agent-smith.mp4" "$scratch/agent-smith.gif" docs/demo/
 completed=true
 printf '%s\n' 'Recorded docs/demo/agent-smith.mp4 and docs/demo/agent-smith.gif.'

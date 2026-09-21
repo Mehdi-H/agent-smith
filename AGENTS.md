@@ -41,6 +41,7 @@
 ### Documentation
 
 - `just demo` — Record a real CLI demonstration as MP4 and GIF under docs/demo.
+- `just demo-check` — Verify the recorded demo exports match the tape geometry and stay animated.
 
 ### Environment
 

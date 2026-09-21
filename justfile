@@ -11,6 +11,11 @@ help:
 demo:
     sh scripts/record-demo.sh
 
+# Verify the recorded demo exports match the tape geometry and stay animated.
+[group("Documentation")]
+demo-check *paths:
+    sh scripts/feedback.sh "Terminal demo" "Re-record with just demo so VHS exports the full animation; inspect the diagnostics below." uv run --offline --no-sync python -m scripts.checks.demo "$@"
+
 # Manage architecture decisions with adr-tools (e.g. just adr new Use argparse).
 [group("Decisions")]
 adr +args:
