@@ -52,10 +52,14 @@ the previous AGENTS.md is restored (or removed if it did not exist). It writes
 `docs/demo/agent-smith.mp4` and
 `docs/demo/agent-smith.gif`; only the GIF is versioned and embedded in the README.
 The MP4 is a local export ignored by Git. This also
-regenerates AGENTS.md, so review that diff with the recording.
+regenerates AGENTS.md, so review that diff with the recording. Before
+publishing, `just demo` runs the `demo-check` feedback check, which uses
+`ffprobe` to verify that both exports carry the tape's geometry and an animated,
+matching frame count, so a truncated or broken GIF fails instead of being
+committed. Run `just demo-check` on its own to re-verify committed artifacts.
 
-VHS, Glow and tmux are pinned in mise.toml. Recording also requires FFmpeg,
-ttyd, `less` and procps `watch` on PATH. On macOS, `less` is included; install the others with
+VHS, Glow and tmux are pinned in mise.toml. Recording also requires FFmpeg
+(including `ffprobe`), ttyd, `less` and procps `watch` on PATH. On macOS, `less` is included; install the others with
 `brew install ffmpeg ttyd watch`; on Debian/Ubuntu, use your package manager's
 `ffmpeg`, `ttyd`, `less` and `procps` packages. The recorder uses a private tmux server
 and closes it on exit, leaving existing terminal sessions alone. VHS may download a browser
