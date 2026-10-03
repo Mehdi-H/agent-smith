@@ -27,7 +27,7 @@ Repository = "https://github.com/Mehdi-H/agent-smith"
 Issues = "https://github.com/Mehdi-H/agent-smith/issues"
 
 [build-system]
-requires = ["uv_build==0.12.17"]
+requires = ["uv_build==0.12.19"]
 build-backend = "uv_build"
 
 [dependency-groups]
@@ -43,7 +43,7 @@ dev = [
     "ty>=0.0.78",
 ]
 release = [
-    "python-semantic-release==10.6.2",
+    "python-semantic-release==10.7.0",
 ]
 
 [tool.uv.build-backend]
