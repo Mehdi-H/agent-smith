@@ -9,13 +9,18 @@ from typing import Protocol, TypeAlias
 from scripts.checks.core import (
     CheckResult,
     IncompleteCheck,
-    InvalidTarget,
     Location,
     Problem,
     Violation,
     run_check,
 )
-from scripts.checks.sha_pinning import FULL_SHA, USES, discover, reference_kind, use_reference
+from scripts.checks.sha_pinning import (
+    FULL_SHA,
+    USES,
+    discover_files,
+    reference_kind,
+    use_reference,
+)
 
 Target: TypeAlias = Path | tuple[Path, ...]
 
@@ -101,20 +106,6 @@ def file_references(path: Path) -> tuple[list[Reference], list[Problem]]:
         if (reference := external_reference(path, number, line)) is not None
     ]
     return references, []
-
-
-def discover_files(paths: tuple[Path, ...]) -> tuple[set[Path], list[Problem]]:
-    """Discover workflow files at the supplied paths."""
-    files: set[Path] = set()
-    problems: list[Problem] = []
-    for path in paths:
-        discovered, invalid = discover(path)
-        files.update(discovered)
-        problems.extend(invalid)
-    if not files and not problems:
-        names = ", ".join(str(path) for path in paths) or ".github/workflows"
-        problems.append(InvalidTarget(names, "No workflow files found; check the supplied paths."))
-    return files, problems
 
 
 def update_problem(reference: Reference, release: Release) -> Violation:

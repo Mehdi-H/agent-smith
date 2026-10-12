@@ -56,7 +56,7 @@ build:
 
 # Check lint, formatting, types, dependencies, secrets and fast tests without network or sync.
 [group("Quality")]
-check: setup lint types dependencies bandit-check secrets-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check sha-pinning-check
+check: setup lint types dependencies bandit-check secrets-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check sha-pinning-check runner-pinning-check
     sh scripts/feedback.sh "Unit tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q tests/unit
 
 # Run every repository-wide quality, maintenance, test, package and release check (network required).
@@ -87,6 +87,11 @@ workflows-check:
 [group("Quality")]
 sha-pinning-check *paths:
     sh scripts/feedback.sh "Action SHA pinning" "Pin every external Action to its full-length 40-character commit SHA as reported below; allowlisted Actions are set in repository settings." uv run --offline --no-sync python -m scripts.checks.sha_pinning "$@"
+
+# Check that workflow jobs run on explicitly versioned runner labels, offline.
+[group("Quality")]
+runner-pinning-check *paths:
+    sh scripts/feedback.sh "Runner pinning" "Replace each reported floating runner label such as ubuntu-latest with an explicit image version such as ubuntu-24.04." uv run --offline --no-sync python -m scripts.checks.runner_pinning "$@"
 
 # Check pinned external Actions against the latest published releases (network required).
 [group("Quality")]
