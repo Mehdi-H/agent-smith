@@ -77,7 +77,7 @@ The generated video is not expected to be byte-identical across platforms.
 ## Continuous integration
 
 GitHub Actions runs `just check` on pull requests and pushes to `main`, using
-Ubuntu and a Python 3.11–3.14 matrix. Each job installs the mise-pinned tools and
+Ubuntu and a Python 3.11–3.15 matrix. Each job installs the mise-pinned tools and
 synchronizes uv.lock. `UV_PYTHON` selects the matrix interpreter instead of the
 local `.python-version` pin. Keep this matrix aligned with the supported Python
 classifiers in pyproject.toml.
@@ -325,7 +325,7 @@ Analytics. These generated files are ignored by Git.
 Install the Codecov GitHub App for Mehdi-H/agent-smith, sign in to Codecov with
 GitHub, and select this repository. CI uploads coverage and test results using
 OIDC (`use_oidc: true`); do not create a CODECOV_TOKEN secret for this setup.
-Only Python 3.14 on main uploads coverage and Test Analytics reports.
+Only Python 3.15 on main uploads coverage and Test Analytics reports.
 All PRs still run all tests but skip Codecov uploads. Upload failures fail the CI job;
 reports are sent after failed tests when files exist and the run was not cancelled.
 The first main upload populates the coverage badge. Codecov does not analyze PRs.
@@ -343,7 +343,7 @@ access and is separate from `just check`.
 
 After correcting an action, merge and let a new main pipeline complete before
 checking again: old annotations are immutable. Codecov uploads run only on main
-with Python 3.14.
+with Python 3.15.
 
 ## Dependency updates
 

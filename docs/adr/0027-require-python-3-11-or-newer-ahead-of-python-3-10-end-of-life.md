@@ -4,9 +4,9 @@ Date: 2026-09-13
 
 ## Status
 
-Accepted
-
 Supercedes [4. Support maintained stable Python versions](0004-support-maintained-stable-python-versions.md)
+
+Superceded by [37. Support Python 3.11 through 3.15 and report coverage from Python 3.15](0037-support-python-3-11-through-3-15-and-report-coverage-from-python-3-15.md)
 
 ## Context
 
