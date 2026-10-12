@@ -33,7 +33,9 @@ release candidate.
 
 ADR 27's other decisions still hold: Ruff and ty target Python 3.11 and the runtime
 uses standard-library tomllib. Daily development moves from Python 3.14.7 to
-Python 3.15.0 through `.python-version`.
+Python 3.15.0 through `.python-version`. It stays the single source of the
+development version: mise reads it through `idiomatic_version_file_enable_tools`
+in mise.toml instead of declaring Python under `[tools]`.
 ADR 10 still selects `just check` in GitHub Actions; its 3.10–3.14 matrix is
 replaced by this range.
 
