@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v0.8.0 (2026-10-12)
+
+### Build System
+
+- Develop on Python 3.15.0 📦
+  ([`f390bdb`](https://github.com/Mehdi-H/agent-smith/commit/f390bdb6977d7de97da5003be30f59dc0fa3f718))
+
+- Let mise read the Python version from .python-version 📦
+  ([`0d37b22`](https://github.com/Mehdi-H/agent-smith/commit/0d37b22e8d62b44748a68b011046f0c52251fad4))
+
+### Features
+
+- Support Python 3.15 ✨
+  ([`72d081e`](https://github.com/Mehdi-H/agent-smith/commit/72d081ef7b9a870ac59da9a1efa1e1398128d173))
+
+
 ## v0.7.0 (2026-10-12)
 
 ### Build System
