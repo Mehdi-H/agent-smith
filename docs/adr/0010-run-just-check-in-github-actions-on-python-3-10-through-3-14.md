@@ -6,6 +6,8 @@ Date: 2026-09-12
 
 Accepted
 
+Amended by [37. Support Python 3.11 through 3.15 and report coverage from Python 3.15](0037-support-python-3-11-through-3-15-and-report-coverage-from-python-3-15.md)
+
 ## Context
 
 The maintainer requested minimal GitHub CI for pull requests and main, running
