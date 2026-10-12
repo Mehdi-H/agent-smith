@@ -32,7 +32,7 @@ jobs:
   release:
     needs: checks
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: write
@@ -81,7 +81,7 @@ jobs:
   publish:
     needs: release
     if: github.ref == 'refs/heads/main' && needs.release.outputs.released == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment: pypi
     permissions:

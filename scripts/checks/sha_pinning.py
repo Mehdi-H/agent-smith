@@ -97,6 +97,20 @@ def discover(path: Path) -> tuple[set[Path], list[InvalidTarget]]:
     return set(), [InvalidTarget(str(path), "workflow path does not exist.")]
 
 
+def discover_files(paths: tuple[Path, ...]) -> tuple[set[Path], list[Problem]]:
+    """Discover workflow files at the supplied paths."""
+    files: set[Path] = set()
+    problems: list[Problem] = []
+    for path in paths:
+        discovered, invalid = discover(path)
+        files.update(discovered)
+        problems.extend(invalid)
+    if not files and not problems:
+        names = ", ".join(str(path) for path in paths) or ".github/workflows"
+        problems.append(InvalidTarget(names, "No workflow files found; check the supplied paths."))
+    return files, problems
+
+
 class ShaPinningCheck:
     """Evaluate full-length SHA pinning across GitHub Actions workflow files."""
 
@@ -105,19 +119,7 @@ class ShaPinningCheck:
     def evaluate(self, target: Target) -> CheckResult:
         """Discover workflow files and return typed pinning problems."""
         paths = (target,) if isinstance(target, Path) else target
-        files: set[Path] = set()
-        problems: list[Problem] = []
-        for path in paths:
-            discovered, discovery_problems = discover(path)
-            files.update(discovered)
-            problems.extend(discovery_problems)
-        if not files and not problems:
-            problems.append(
-                InvalidTarget(
-                    ", ".join(str(path) for path in paths) or ".github/workflows",
-                    "No workflow files found; check the supplied paths.",
-                )
-            )
+        files, problems = discover_files(paths)
         for path in sorted(files):
             problems.extend(file_problems(path))
         return CheckResult.from_problems(problems)
