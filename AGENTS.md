@@ -9,7 +9,7 @@
   Build living agent instructions from the project sources you already maintain.
 </p>
 
-<p align="center">    </p>
+<p align="center">       </p>
 
 <p align="center"><code>uv tool install agent-smith-cli</code></p>
 
@@ -18,15 +18,15 @@
 ## Main tech stack
 
 - `adr-tools` — `3.0.0`
-- `github:betterleaks/betterleaks` — `1.8.1`
-- `gh` — `2.101.0`
+- `github:betterleaks/betterleaks` — `1.9.0`
+- `gh` — `2.102.0`
 - `github:agent-ecosystem/skill-validator` — `1.6.2`
 - `glow` — `3.0.0`
 - `just` — `1.58.0`
-- `lefthook` — `2.1.14`
+- `lefthook` — `2.2.1`
 - `shellcheck` — `0.11.0`
 - `tmux` — `3.7c`
-- `uv` — `0.12.19`
+- `uv` — `0.13.0`
 - `vhs` — `0.12.1`
 - `zizmor` — `1.30.1`
 
