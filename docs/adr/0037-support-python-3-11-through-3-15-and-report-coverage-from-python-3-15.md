@@ -31,8 +31,9 @@ the newest tested interpreter, Python 3.15, on main; this replaces the Python
 Keep uv 0.13.0 or newer in mise.toml so CI installs Python 3.15.0 rather than a
 release candidate.
 
-ADR 27's other decisions still hold: Ruff and ty target Python 3.11, the runtime
-uses standard-library tomllib, and daily development keeps Python 3.14.7.
+ADR 27's other decisions still hold: Ruff and ty target Python 3.11 and the runtime
+uses standard-library tomllib. Daily development moves from Python 3.14.7 to
+Python 3.15.0 through `.python-version`.
 ADR 10 still selects `just check` in GitHub Actions; its 3.10–3.14 matrix is
 replaced by this range.
 
