@@ -83,7 +83,8 @@ local `.python-version` pin. Keep this matrix aligned with the supported Python
 classifiers in pyproject.toml.
 
 After `just check`, CI runs `just test-integration` and `just test-functional`
-on each matrix interpreter. Packaging and deployment are separate operations.
+on each matrix interpreter. The `just check` step reports every failing check, as
+it does locally. GitHub skips the later test steps when that step fails. Packaging and deployment are separate operations.
 
 ## Workflow security
 
@@ -129,6 +130,8 @@ CLI consumers. See [the security feedback decision](docs/adr/0020-audit-python-s
 `just setup` installs Lefthook's pre-commit hook for this checkout. After updating
 an existing checkout, run `mise install` and `just hooks-install` to enable it.
 Every commit runs `just check` and `just cli-check`; a failure blocks the commit.
+Both commands run even when the first fails, so one commit attempt reports every
+failing check.
 `just cli-check` invokes the installed `agent-smith --help` command through uv,
 offline and without synchronizing dependencies. This verifies startup without
 generating an output file as a side effect of committing.
@@ -156,6 +159,12 @@ sh scripts/feedback.sh 'Check name' 'How to fix or investigate the failure' comm
 ```
 
 The wrapper preserves native output and records the native exit code on failure.
+`just check` and `just check-repo-wide` run their checks through
+`scripts/collect-feedback.sh`. Every check runs, even after a failure, and each
+failing check prints its own diagnostics and hint. The run ends with a summary
+naming each failing check, and the command exits 1 if any check failed. A failing
+step outside the wrapper, such as `just setup`, still stops the run up front. See
+[the collected feedback decision](docs/adr/0038-report-every-failing-feedback-check-in-one-run-of-just-check.md).
 Do not hide setup failures, missing tools or failed checks with `|| true`. Just
 recipes suppress command echo; just may add its own diagnostic on failure.
 This harness currently requires a POSIX shell. The installed CLI does not.
