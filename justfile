@@ -54,14 +54,26 @@ build:
     rm -f dist/*.whl dist/*.tar.gz
     uv build --no-sources
 
-# Check lint, formatting, types, dependencies, secrets and fast tests without network or sync.
+# Check lint, formatting, types, dependencies, secrets and fast tests without network or sync, reporting every failure.
 [group("Quality")]
-check: setup lint types dependencies bandit-check secrets-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check sha-pinning-check runner-pinning-check
+[no-exit-message]
+check: setup
+    sh scripts/collect-feedback.sh just _check-suite
+
+# Run the checks of just check without setup; collect-feedback.sh reports every failure.
+[group("Quality")]
+_check-suite: lint types dependencies bandit-check secrets-check shellcheck-check complexity-check test-doubles-check test-structure manifest-check skills-check workflows-check sha-pinning-check runner-pinning-check
     sh scripts/feedback.sh "Unit tests" "Fix the failing assertions; use just test for full coverage reports." uv run --offline --no-sync pytest -q tests/unit
 
-# Run every repository-wide quality, maintenance, test, package and release check (network required).
+# Run every repository-wide quality, maintenance, test, package and release check (network required), reporting every failure.
 [group("Quality")]
-check-repo-wide: check cli-check package-check audit-check updates-check sha-update-check workflow-warnings
+[no-exit-message]
+check-repo-wide: setup
+    sh scripts/collect-feedback.sh just _check-repo-wide-suite
+
+# Run the checks of just check-repo-wide without setup; collect-feedback.sh reports every failure.
+[group("Quality")]
+_check-repo-wide-suite: _check-suite cli-check package-check audit-check updates-check sha-update-check workflow-warnings
     sh scripts/feedback.sh "All tests" "Fix the failing test or coverage diagnostics reported below." just test
     sh scripts/feedback.sh "Repository complexity" "Refactor every reported function to cognitive complexity 8 or less." uv run --offline --no-sync complexipy src scripts tests --max-complexity-allowed 8 --no-ignore --check-script
     sh scripts/feedback.sh "Release preview" "Fix the semantic-release diagnostics before preparing a release." just release-preview
