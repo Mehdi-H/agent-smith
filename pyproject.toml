@@ -28,13 +28,13 @@ Repository = "https://github.com/Mehdi-H/agent-smith"
 Issues = "https://github.com/Mehdi-H/agent-smith/issues"
 
 [build-system]
-requires = ["uv_build==0.12.22"]
+requires = ["uv_build==0.13.8"]
 build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
     "bandit[toml]>=1.9.4",
-    "complexipy>=8,<9",
+    "complexipy>=8,<10",
     "deptry>=0.25.1",
     "mutmut>=3.7.0",
     "pip-audit>=2.10.1",
